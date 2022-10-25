@@ -1,13 +1,16 @@
 package io.aggregator.api;
 
-import kalix.javasdk.testkit.junit.KalixTestKitResource;
-import com.google.protobuf.Empty;
 import io.aggregator.Main;
-import io.aggregator.entity.TransactionEntity;
+import io.aggregator.TimeTo;
+import kalix.javasdk.testkit.junit.KalixTestKitResource;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import static java.util.concurrent.TimeUnit.*;
+import java.time.Instant;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -36,8 +39,63 @@ public class TransactionIntegrationTest {
 
   @Test
   public void createTransactionOnNonExistingEntity() throws Exception {
-    // TODO: set fields in command, and provide assertions to match replies
-    // client.createTransaction(TransactionApi.CreateTransactionCommand.newBuilder().build())
-    //         .toCompletableFuture().get(5, SECONDS);
+    TransactionApi.PaymentPricedCommand command = TransactionApi.PaymentPricedCommand.newBuilder()
+        .setTransactionId("txn1")
+        .setEventType("authorized")
+        .setShopId("tesco-chelsea")
+        .setTimestamp(TimeTo.fromEpochSecond(Instant.parse("2022-10-17T10:15:30.00Z").getEpochSecond()).toTimestamp())
+        .addPricedItem(TransactionApi.PricedItem.newBuilder()
+            .setServiceCode("SVC1")
+            .setPricedItemAmount("1.11")
+            .build())
+        .build();
+    client.paymentPriced(command);
+
+    TransactionApi.PaymentPricedCommand command2 = TransactionApi.PaymentPricedCommand.newBuilder()
+        .setTransactionId("txn1")
+        .setEventType("approved")
+        .setShopId("tesco-chelsea")
+        .setTimestamp(TimeTo.fromEpochSecond(Instant.parse("2022-10-17T10:15:40.00Z").getEpochSecond()).toTimestamp())
+        .addPricedItem(TransactionApi.PricedItem.newBuilder()
+            .setServiceCode("SVC2")
+            .setPricedItemAmount("2.22")
+            .build())
+        .build();
+    client.paymentPriced(command2);
+
+    TransactionApi.PaymentPricedCommand command3 = TransactionApi.PaymentPricedCommand.newBuilder()
+        .setTransactionId("txn1")
+        .setEventType("cleared")
+        .setShopId("tesco-chelsea")
+        .setTimestamp(TimeTo.fromEpochSecond(Instant.parse("2022-10-17T11:40:00.00Z").getEpochSecond()).toTimestamp())
+        .addPricedItem(TransactionApi.PricedItem.newBuilder()
+            .setServiceCode("SVC3")
+            .setPricedItemAmount("3.33")
+            .build())
+        .build();
+    client.paymentPriced(command3);
+
+    TransactionApi.PaymentPricedCommand command4 = TransactionApi.PaymentPricedCommand.newBuilder()
+        .setTransactionId("txn1")
+        .setEventType("settled")
+        .setShopId("tesco-chelsea")
+        .setTimestamp(TimeTo.fromEpochSecond(Instant.parse("2022-10-17T16:27:50.00Z").getEpochSecond()).toTimestamp())
+        .addPricedItem(TransactionApi.PricedItem.newBuilder()
+            .setServiceCode("SVC4")
+            .setPricedItemAmount("4.44")
+            .build())
+        .build();
+    client.paymentPriced(command4);
+
+    Thread.sleep(10000);
+
+    TransactionApi.GetTransactionResponse transactionResponse = client.getTransaction(TransactionApi.GetTransactionRequest.newBuilder()
+        .setTransactionId("txn1")
+        .build()).toCompletableFuture().get(5, SECONDS);
+
+    assertNotNull(transactionResponse);
+    assertEquals("txn1", transactionResponse.getTransactionId());
+    assertEquals("tesco-chelsea", transactionResponse.getShopId());
+    assertEquals(4, transactionResponse.getTransactionIncidentCount());
   }
 }

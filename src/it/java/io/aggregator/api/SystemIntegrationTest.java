@@ -136,7 +136,7 @@ public class SystemIntegrationTest {
     int[] numberOfEventsByMerchant = new int[merchants.size()];
     int[] amountByMerchant = new int[merchants.size()];
 
-    for (int i = 1; i <= 300; i++) {
+    for (int i = 1; i <= 100; i++) {
       int merchantIndex = random.nextInt(merchants.size());
       numberOfEventsByMerchant[merchantIndex]++;
       amountByMerchant[merchantIndex] += i;
@@ -165,18 +165,20 @@ public class SystemIntegrationTest {
               .build())
           .build());
     }
-    System.out.println("PAYMENT_PRICED END TIME: " + Instant.now().toString());
     Thread.sleep(30000);
+    System.out.println("PAYMENT_PRICED END TIME: " + Instant.now().toString());
 
+    System.out.println("MERCHANT_AGGREGATION START TIME: " + Instant.now().toString());
     for (String merchant : merchants) {
       merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand
           .newBuilder()
           .setMerchantId(merchant)
           .build());
     }
+    Thread.sleep(10000);
     System.out.println("MERCHANT_AGGREGATION END TIME: " + Instant.now().toString());
-    Thread.sleep(20000);
 
+    // TODO add view check, there should be (merchants.size() * 100 * 4) entries
     for (int i = 0; i < merchants.size(); i++) {
       String merchant = merchants.get(i);
       PaymentApi.PaymentStatusResponse paymentStatusResponse = paymentClient.paymentStatus(PaymentApi.PaymentStatusCommand
@@ -184,6 +186,7 @@ public class SystemIntegrationTest {
           .setMerchantId(merchant)
           .setPaymentId("payment-1")
           .build()).toCompletableFuture().get(10, SECONDS);
+      System.out.println("PAYMENT_STATUS FOR " + merchant + " END TIME: " + Instant.now().toString());
       assertNotNull(paymentStatusResponse);
       assertEquals(merchant, paymentStatusResponse.getMerchantId());
       assertEquals("payment-1", paymentStatusResponse.getPaymentId());

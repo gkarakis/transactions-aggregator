@@ -18,11 +18,10 @@ message TransactionCreated {
 
 message IncidentAdded {
   string transaction_id = 1;
-  string event_type = 2;
-  string shop_id = 3;
-  string merchant_id = 4;
-  google.protobuf.Timestamp incident_timestamp = 5;
-  repeated TransactionIncident transaction_incident = 6;
+  string shop_id = 2;
+  string merchant_id = 3;
+  google.protobuf.Timestamp incident_timestamp = 4;
+  TransactionIncident transaction_incident = 5;
 }
 
 message PaymentAdded {
@@ -40,8 +39,12 @@ message TransactionState {
 }
 
 message TransactionIncident {
+  string event_type = 1;
+  google.protobuf.Timestamp transaction_incident_timestamp = 2;
+  repeated TransactionIncidentService transaction_incident_service = 3;
+}
+
+message TransactionIncidentService {
   string service_code = 1;
-  string account_from = 2;
-  string account_to = 3;
-  string incident_amount = 4;
+  string service_amount = 2;
 }

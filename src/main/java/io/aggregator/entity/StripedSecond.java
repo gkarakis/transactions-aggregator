@@ -65,6 +65,17 @@ public class StripedSecond extends AbstractStripedSecond {
     log.debug(Thread.currentThread().getName() + " - state: {}\nAddLedgerItemsCommand: {}", state, command);
     log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddLedgerItemsCommand");
 
+    boolean newEntry = command.getLedgerItemList().stream()
+        .allMatch(ledgerItem -> state.getLedgerEntriesList().stream()
+            .noneMatch(existingLedgerEntry -> existingLedgerEntry.getTransactionKey().getTransactionId().equals(command.getTransactionId()) &&
+                    existingLedgerEntry.getTransactionKey().getServiceCode().equals(ledgerItem.getServiceCode()) &&
+                    existingLedgerEntry.getTransactionKey().getAccountFrom().equals(ledgerItem.getAccountFrom()) &&
+                    existingLedgerEntry.getTransactionKey().getAccountTo().equals(ledgerItem.getAccountTo()) &&
+                    existingLedgerEntry.getTimestamp().equals(command.getTimestamp())));
+    if (!newEntry) {
+      return effects().reply(Empty.getDefaultInstance());
+    }
+
     return effects()
         .emitEvents(eventsFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
@@ -102,9 +113,10 @@ public class StripedSecond extends AbstractStripedSecond {
     log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: StripedSecondLedgerItemsAdded");
 
     var newState = state.toBuilder();
-    event.getLedgerEntriesList().stream()
-        .filter(ledgerEntry -> state.getLedgerEntriesList().stream()
-            .noneMatch(existingLedgerEntry -> existingLedgerEntry.getTransactionKey().equals(ledgerEntry.getTransactionKey())))
+    event.getLedgerEntriesList()
+//        .filter(ledgerEntry -> state.getLedgerEntriesList().stream()
+//            .noneMatch(existingLedgerEntry -> existingLedgerEntry.getTransactionKey().equals(ledgerEntry.getTransactionKey()) &&
+//                existingLedgerEntry.getTimestamp().equals(ledgerEntry.getTimestamp())))
         .forEach(newState::addLedgerEntries);
     return newState.setShopId(event.getShopId()).build();
   }

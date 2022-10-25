@@ -1,6 +1,7 @@
 package io.aggregator.action;
 
 import io.aggregator.api.StripedSecondApi;
+import io.aggregator.service.RuleService;
 import kalix.javasdk.action.ActionCreationContext;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
@@ -9,8 +10,6 @@ import io.aggregator.TimeTo;
 import io.aggregator.entity.TransactionEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.stream.Collectors;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Action Service described in your io/aggregator/action/transaction_to_striped_second_action.proto.proto file.
@@ -31,6 +30,7 @@ public class TransactionToStripedSecondAction extends AbstractTransactionToStrip
 
     log.debug(Thread.currentThread().getName() + " - IncidentAdded: {}", event);
     log.info(Thread.currentThread().getName() + " - ON EVENT: IncidentAdded");
+
     return effects().forward(components().stripedSecond().addLedgerItems(
         StripedSecondApi.AddLedgerItemsCommand
             .newBuilder()
@@ -40,19 +40,8 @@ public class TransactionToStripedSecondAction extends AbstractTransactionToStrip
             .setTimestamp(timestamp)
             .setStripe(stripe)
             .setShopId(event.getShopId())
-            .addAllLedgerItem(event.getTransactionIncidentList().stream()
-                .map(TransactionToStripedSecondAction::toLedgerItem)
-                .collect(Collectors.toList()))
+            .addAllLedgerItem(RuleService.applyRules(event.getMerchantId(), event.getTransactionIncident().getTransactionIncidentServiceList()))
             .build()));
-  }
-
-  static StripedSecondApi.LedgerItem toLedgerItem(TransactionEntity.TransactionIncident transactionIncident) {
-    return StripedSecondApi.LedgerItem.newBuilder()
-            .setServiceCode(transactionIncident.getServiceCode())
-            .setAmount(transactionIncident.getIncidentAmount())
-            .setAccountFrom(transactionIncident.getAccountFrom())
-            .setAccountTo(transactionIncident.getAccountTo())
-            .build();
   }
 
   @Override

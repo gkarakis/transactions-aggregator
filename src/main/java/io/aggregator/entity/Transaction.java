@@ -1,12 +1,12 @@
 package io.aggregator.entity;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import com.google.protobuf.Empty;
 
 import io.aggregator.service.MerchantService;
-import io.aggregator.service.RuleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +48,13 @@ public class Transaction extends AbstractTransaction {
     log.debug(Thread.currentThread().getName() + " - state: {}\nPaymentPricedCommand: {}", state, command);
     log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: PaymentPricedCommand");
 
+    if (state.getTransactionIncidentList().stream().anyMatch(transactionIncident ->
+        transactionIncident.getTransactionIncidentTimestamp().equals(command.getTimestamp()) &&
+            transactionIncident.getEventType().equals(command.getEventType())
+    )) {
+      return effects().reply(Empty.getDefaultInstance());
+    }
+
     return effects()
         .emitEvent(eventFor(state, command))
         .thenReply(newState -> Empty.getDefaultInstance());
@@ -69,6 +76,7 @@ public class Transaction extends AbstractTransaction {
             .setShopId(state.getShopId())
             .setTransactionAmount(state.getTransactionAmount())
             .setTransactionTimestamp(state.getTransactionTimestamp())
+            .addAllTransactionIncident(state.getTransactionIncidentList())
             .build());
   }
 
@@ -78,7 +86,7 @@ public class Transaction extends AbstractTransaction {
         .setTransactionId(event.getTransactionId())
         .setMerchantId(event.getMerchantId())
         .setShopId(event.getShopId())
-        .addAllTransactionIncident(event.getTransactionIncidentList())
+        .addTransactionIncident(event.getTransactionIncident())
         .build();
   }
 
@@ -87,15 +95,23 @@ public class Transaction extends AbstractTransaction {
     return TransactionEntity.IncidentAdded
             .newBuilder()
             .setTransactionId(command.getTransactionId())
-            .setEventType(command.getEventType())
             .setShopId(command.getShopId())
             .setMerchantId(merchant)
             .setIncidentTimestamp(command.getTimestamp())
-            .addAllTransactionIncident(toTransactionIncidents(state, merchant, command))
+            .setTransactionIncident(toTransactionIncident(state, command))
             .build();
   }
 
-  static Iterable<TransactionEntity.TransactionIncident> toTransactionIncidents(TransactionEntity.TransactionState state, String merchant, TransactionApi.PaymentPricedCommand command) {
-    return RuleService.applyRules(state, merchant, command);
+  static TransactionEntity.TransactionIncident toTransactionIncident(TransactionEntity.TransactionState state, TransactionApi.PaymentPricedCommand command) {
+    return TransactionEntity.TransactionIncident.newBuilder()
+        .setEventType(command.getEventType())
+        .setTransactionIncidentTimestamp(command.getTimestamp())
+        .addAllTransactionIncidentService(command.getPricedItemList().stream()
+            .map(pricedItem -> TransactionEntity.TransactionIncidentService.newBuilder()
+                .setServiceCode(pricedItem.getServiceCode())
+                .setServiceAmount(pricedItem.getPricedItemAmount())
+                .build())
+            .collect(Collectors.toList()))
+        .build();
   }
 }

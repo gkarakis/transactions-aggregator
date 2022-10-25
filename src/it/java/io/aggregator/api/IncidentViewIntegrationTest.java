@@ -5,9 +5,7 @@ import com.google.protobuf.util.Timestamps;
 import io.aggregator.Main;
 import io.aggregator.entity.TransactionMerchantKey;
 import io.aggregator.view.IncidentsByDate;
-import io.aggregator.view.IncidentsByDateClient;
 import io.aggregator.view.IncidentsByDateModel;
-import io.aggregator.view.IncidentsByDateView;
 import kalix.javasdk.testkit.junit.KalixTestKitResource;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -17,6 +15,7 @@ import java.util.Date;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -70,7 +69,7 @@ public class IncidentViewIntegrationTest {
             .setMerchantId(merchantId)
             .setShopId(shopId)
             .build();
-    var createResponse = client.createIncident(createCommand).toCompletableFuture().get(5,SECONDS);
+    var createResponse = client.createIncident(createCommand).toCompletableFuture().get(15,SECONDS);
 
     var getCommand = IncidentApi.GetIncidentRequest.newBuilder()
             .setTransactionId(key.getTransactionId())
@@ -78,23 +77,23 @@ public class IncidentViewIntegrationTest {
             .setAccountFrom(key.getAccountFrom())
             .setAccountTo(key.getAccountTo())
             .build();
-    var get = client.getIncident(getCommand).toCompletableFuture().get(5,SECONDS);
+    var get = client.getIncident(getCommand).toCompletableFuture().get(15,SECONDS);
 
     assertEquals(incidentAmount, get.getIncidentAmount());
-    assertEquals(true,get.getPaymentId().isEmpty());
+    assertTrue(get.getPaymentId().isEmpty());
 
     Thread.sleep(5000);
 
     Timestamp from = Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli());
     Timestamp to = Timestamps.fromMillis(Instant.now().toEpochMilli());
-    var unPayedIncidentsByMerchantAndDateReq = IncidentsByDateModel.IncidentsByDateRequest.newBuilder()
+    var unPaidIncidentsByMerchantAndDateReq = IncidentsByDateModel.IncidentsByDateRequest.newBuilder()
             .setFromDate(from)
             .setToDate(to)
             .setMerchantId(merchantId)
             .setPaymentId("0")
             .build();
-    var unPayedIncidentsByMerchantAndDateRes = view.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(1,unPayedIncidentsByMerchantAndDateRes.getResultsCount());
+    var unPaidIncidentsByMerchantAndDateRes = view.getIncidentsByDate(unPaidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,unPaidIncidentsByMerchantAndDateRes.getResultsCount());
 
 
     var addPaymentCommand = IncidentApi.AddPaymentCommand.newBuilder()
@@ -113,16 +112,16 @@ public class IncidentViewIntegrationTest {
     Thread.sleep(5000);
 
     //check
-    unPayedIncidentsByMerchantAndDateRes = view.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(0,unPayedIncidentsByMerchantAndDateRes.getResultsCount());
+    unPaidIncidentsByMerchantAndDateRes = view.getIncidentsByDate(unPaidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(0,unPaidIncidentsByMerchantAndDateRes.getResultsCount());
 
-    var payedIncidentsByMerchantAndDateReq = unPayedIncidentsByMerchantAndDateReq
+    var paidIncidentsByMerchantAndDateReq = unPaidIncidentsByMerchantAndDateReq
             .toBuilder()
             .setPaymentId(paymentId)
             .build();
-    var payedIncidentsByMerchantAndDateRes = view.getIncidentsByDate(payedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(1,payedIncidentsByMerchantAndDateRes.getResultsCount());
-    assertEquals(paymentId, payedIncidentsByMerchantAndDateRes.getResults(0).getPaymentId());
+    var paidIncidentsByMerchantAndDateRes = view.getIncidentsByDate(paidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,paidIncidentsByMerchantAndDateRes.getResultsCount());
+    assertEquals(paymentId, paidIncidentsByMerchantAndDateRes.getResults(0).getPaymentId());
 
   }
 

@@ -80,7 +80,7 @@ public class StripedSecondToIncidentAction extends AbstractStripedSecondToIncide
             CompletableFuture.allOf(futuresList.toArray(new CompletableFuture[futuresList.size()]));
     return allFuturesResult.thenApply(v ->
             futuresList.stream().
-                    map(future -> future.join()).
+                    map(CompletableFuture::join).
                     collect(Collectors.<T>toList())
     );
   }
