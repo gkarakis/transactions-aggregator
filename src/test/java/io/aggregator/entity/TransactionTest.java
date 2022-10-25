@@ -52,49 +52,19 @@ public class TransactionTest {
     var incidentAdded = response.getNextEventOfType(TransactionEntity.IncidentAdded.class);
     assertEquals("transaction-1", incidentAdded.getTransactionId());
     assertEquals("shop-1", incidentAdded.getShopId());
-    assertEquals("event-type-1", incidentAdded.getEventType());
     assertEquals(now, incidentAdded.getIncidentTimestamp());
-    assertEquals(1, incidentAdded.getTransactionIncidentList().size());
-    assertEquals("SVC1", incidentAdded.getTransactionIncidentList().get(0).getServiceCode());
-    assertEquals("123.45", incidentAdded.getTransactionIncidentList().get(0).getIncidentAmount());
-    assertEquals("JPMC", incidentAdded.getTransactionIncidentList().get(0).getAccountFrom());
-    assertEquals("MERCHANT-SHOP", incidentAdded.getTransactionIncidentList().get(0).getAccountTo());
+    assertEquals("event-type-1", incidentAdded.getTransactionIncident().getEventType());
+    assertEquals(1, incidentAdded.getTransactionIncident().getTransactionIncidentServiceCount());
+    assertEquals("SVC1", incidentAdded.getTransactionIncident().getTransactionIncidentService(0).getServiceCode());
+    assertEquals("123.45", incidentAdded.getTransactionIncident().getTransactionIncidentService(0).getServiceAmount());
 
     var state = testKit.getState();
     assertEquals("transaction-1", state.getTransactionId());
     assertEquals("shop", state.getMerchantId());
     assertEquals("shop-1", state.getShopId());
-    assertEquals(1, state.getTransactionIncidentList().size());
-    assertEquals("SVC1", state.getTransactionIncidentList().get(0).getServiceCode());
-    assertEquals("123.45", state.getTransactionIncidentList().get(0).getIncidentAmount());
-    assertEquals("JPMC", state.getTransactionIncidentList().get(0).getAccountFrom());
-    assertEquals("MERCHANT-SHOP", state.getTransactionIncidentList().get(0).getAccountTo());
-  }
-
-  @Ignore
-  @Test
-  public void getTransactionTest() {
-    TransactionTestKit testKit = TransactionTestKit.of(Transaction::new);
-
-    testKit.paymentPriced(
-        TransactionApi.PaymentPricedCommand
-            .newBuilder()
-            .setTransactionId("transaction-1")
-            .setTimestamp(TimeTo.now())
-            .build());
-
-    var response = testKit.getTransaction(
-        TransactionApi.GetTransactionRequest
-            .newBuilder()
-            .setTransactionId("transaction-1")
-            .build());
-
-    var transaction = response.getReply();
-
-    assertNotNull(transaction);
-    assertEquals("transaction-1", transaction.getTransactionId());
-    assertEquals("merchant-1", transaction.getMerchantId());
-    assertEquals("123.45", transaction.getTransactionAmount());
-    assertTrue(transaction.getTransactionTimestamp().getSeconds() > 0);
+    assertEquals(1, state.getTransactionIncidentCount());
+    assertEquals(1, state.getTransactionIncident(0).getTransactionIncidentServiceCount());
+    assertEquals("SVC1", state.getTransactionIncident(0).getTransactionIncidentService(0).getServiceCode());
+    assertEquals("123.45", state.getTransactionIncident(0).getTransactionIncidentService(0).getServiceAmount());
   }
 }

@@ -1,6 +1,6 @@
 package io.aggregator.service;
 
-import io.aggregator.api.TransactionApi;
+import io.aggregator.api.StripedSecondApi;
 import io.aggregator.entity.TransactionEntity;
 import io.aggregator.entity.TransactionMerchantKey;
 
@@ -19,44 +19,44 @@ public class RuleService {
   public static final String TAX_ACCOUNT = "TAX";
   public static final String CARD_SCHEME_ACCOUNT = "CARD-SCHEME";
 
-  public static Iterable<TransactionEntity.TransactionIncident> applyRules(TransactionEntity.TransactionState state, String merchant, TransactionApi.PaymentPricedCommand command) {
-    return command.getPricedItemList().stream()
-        .flatMap(pricedItem -> applyRules(state, merchant, pricedItem))
+  public static Iterable<StripedSecondApi.LedgerItem> applyRules(String merchant, List<TransactionEntity.TransactionIncidentService> transactionIncidentServices) {
+    return transactionIncidentServices.stream()
+        .flatMap(pricedItem -> applyRules(merchant, pricedItem))
         .collect(Collectors.toList());
   }
 
-  static Stream<TransactionEntity.TransactionIncident> applyRules(TransactionEntity.TransactionState state, String merchant, TransactionApi.PricedItem pricedItem) {
+  static Stream<StripedSecondApi.LedgerItem> applyRules(String merchant, TransactionEntity.TransactionIncidentService transactionIncidentService) {
     String merchantAccount = findMerchantAccount(merchant);
 
-    return switch (pricedItem.getServiceCode()) {
+    return switch (transactionIncidentService.getServiceCode()) {
       case "SVC1" -> Stream.of(
-          TransactionEntity.TransactionIncident.newBuilder()
-              .setServiceCode(pricedItem.getServiceCode())
-              .setIncidentAmount(pricedItem.getPricedItemAmount())
+          StripedSecondApi.LedgerItem.newBuilder()
+              .setServiceCode(transactionIncidentService.getServiceCode())
+              .setAmount(transactionIncidentService.getServiceAmount())
               .setAccountFrom(JPMC_ACCOUNT)
               .setAccountTo(merchantAccount)
               .build()
       );
       case "SVC2" -> Stream.of(
-          TransactionEntity.TransactionIncident.newBuilder()
-              .setServiceCode(pricedItem.getServiceCode())
-              .setIncidentAmount(pricedItem.getPricedItemAmount())
+          StripedSecondApi.LedgerItem.newBuilder()
+              .setServiceCode(transactionIncidentService.getServiceCode())
+              .setAmount(transactionIncidentService.getServiceAmount())
               .setAccountFrom(merchantAccount)
               .setAccountTo(JPMC_ACCOUNT)
               .build()
       );
       case "SVC3" -> Stream.of(
-          TransactionEntity.TransactionIncident.newBuilder()
-              .setServiceCode(pricedItem.getServiceCode())
-              .setIncidentAmount(pricedItem.getPricedItemAmount())
+          StripedSecondApi.LedgerItem.newBuilder()
+              .setServiceCode(transactionIncidentService.getServiceCode())
+              .setAmount(transactionIncidentService.getServiceAmount())
               .setAccountFrom(merchantAccount)
               .setAccountTo(TAX_ACCOUNT)
               .build()
       );
       case "SVC4" -> Stream.of(
-          TransactionEntity.TransactionIncident.newBuilder()
-              .setServiceCode(pricedItem.getServiceCode())
-              .setIncidentAmount(pricedItem.getPricedItemAmount())
+          StripedSecondApi.LedgerItem.newBuilder()
+              .setServiceCode(transactionIncidentService.getServiceCode())
+              .setAmount(transactionIncidentService.getServiceAmount())
               .setAccountFrom(merchantAccount)
               .setAccountTo(CARD_SCHEME_ACCOUNT)
               .build()

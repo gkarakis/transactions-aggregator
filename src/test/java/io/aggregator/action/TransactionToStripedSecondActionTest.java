@@ -39,15 +39,15 @@ public class TransactionToStripedSecondActionTest {
         TransactionEntity.IncidentAdded
             .newBuilder()
             .setTransactionId("transaction-1")
-            .setEventType("event-type-1")
             .setShopId("merchant-shop")
             .setMerchantId("merchant")
             .setIncidentTimestamp(timestamp)
-            .addTransactionIncident(TransactionEntity.TransactionIncident.newBuilder()
-                .setServiceCode("service-code-1")
-                .setIncidentAmount("123.45")
-                .setAccountFrom("from")
-                .setAccountTo("to")
+            .setTransactionIncident(TransactionEntity.TransactionIncident.newBuilder()
+                .setEventType("event-type-1")
+                .addTransactionIncidentService(TransactionEntity.TransactionIncidentService.newBuilder()
+                    .setServiceCode("service-code-1")
+                    .setServiceAmount("123.45")
+                    .build())
                 .build())
             .build());
 

@@ -4,6 +4,7 @@ import "kalix/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_entity.proto";
 
 package io.aggregator.api;
 
@@ -58,4 +59,5 @@ message GetTransactionResponse {
   string shop_id = 3;
   string transaction_amount = 4;
   google.protobuf.Timestamp transaction_timestamp = 5;
+  repeated entity.TransactionIncident transaction_incident = 6;
 }

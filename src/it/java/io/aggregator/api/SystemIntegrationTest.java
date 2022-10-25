@@ -1,5 +1,9 @@
 package io.aggregator.api;
 
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
+import io.aggregator.view.IncidentsByDate;
+import io.aggregator.view.IncidentsByDateModel;
 import kalix.javasdk.testkit.junit.KalixTestKitResource;
 import io.aggregator.Main;
 import io.aggregator.TimeTo;
@@ -38,11 +42,13 @@ public class SystemIntegrationTest {
   private final Transaction transactionClient;
   private final Merchant merchantClient;
   private final Payment paymentClient;
+  private final IncidentsByDate incidentsView;
 
   public SystemIntegrationTest() {
     transactionClient = testKit.getGrpcClient(Transaction.class);
     merchantClient = testKit.getGrpcClient(Merchant.class);
     paymentClient = testKit.getGrpcClient(Payment.class);
+    incidentsView = testKit.getGrpcClient(IncidentsByDate.class);
   }
 
   @Test
@@ -62,6 +68,17 @@ public class SystemIntegrationTest {
         .build()).toCompletableFuture().get(10, SECONDS);
     Thread.sleep(20000);
     System.out.println("PAYMENT_PRICED END TIME: " + Instant.now().toString());
+
+    Timestamp from = Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli());
+    Timestamp to = Timestamps.fromMillis(Instant.now().toEpochMilli());
+    var unPayedIncidentsByMerchantAndDateReq = IncidentsByDateModel.IncidentsByDateRequest.newBuilder()
+            .setFromDate(from)
+            .setToDate(to)
+            .setMerchantId("tesco")
+            .setPaymentId("0")
+            .build();
+    var unPayedIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,unPayedIncidentsByMerchantAndDateRes.getResultsCount());
 
     merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand
         .newBuilder()
@@ -86,6 +103,22 @@ public class SystemIntegrationTest {
     assertEquals("JPMC", moneyMovement.getAccountFrom());
     assertEquals("MERCHANT-TESCO", moneyMovement.getAccountTo());
     assertEquals("1.01", moneyMovement.getAmount());
+
+    //check
+    unPayedIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(0,unPayedIncidentsByMerchantAndDateRes.getResultsCount());
+
+    var payedIncidentsByMerchantAndDateReq = unPayedIncidentsByMerchantAndDateReq
+            .toBuilder()
+            .setPaymentId("payment-1")
+            .build();
+    var payedIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(payedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,payedIncidentsByMerchantAndDateRes.getResultsCount());
+    assertEquals("payment-1", payedIncidentsByMerchantAndDateRes.getResults(0).getPaymentId());
+
+
+
+
   }
 
   @Test
@@ -103,7 +136,7 @@ public class SystemIntegrationTest {
     int[] numberOfEventsByMerchant = new int[merchants.size()];
     int[] amountByMerchant = new int[merchants.size()];
 
-    for (int i = 1; i <= 300; i++) {
+    for (int i = 1; i <= 100; i++) {
       int merchantIndex = random.nextInt(merchants.size());
       numberOfEventsByMerchant[merchantIndex]++;
       amountByMerchant[merchantIndex] += i;
@@ -132,18 +165,20 @@ public class SystemIntegrationTest {
               .build())
           .build());
     }
-    System.out.println("PAYMENT_PRICED END TIME: " + Instant.now().toString());
     Thread.sleep(30000);
+    System.out.println("PAYMENT_PRICED END TIME: " + Instant.now().toString());
 
+    System.out.println("MERCHANT_AGGREGATION START TIME: " + Instant.now().toString());
     for (String merchant : merchants) {
       merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand
           .newBuilder()
           .setMerchantId(merchant)
           .build());
     }
+    Thread.sleep(10000);
     System.out.println("MERCHANT_AGGREGATION END TIME: " + Instant.now().toString());
-    Thread.sleep(20000);
 
+    // TODO add view check, there should be (merchants.size() * 100 * 4) entries
     for (int i = 0; i < merchants.size(); i++) {
       String merchant = merchants.get(i);
       PaymentApi.PaymentStatusResponse paymentStatusResponse = paymentClient.paymentStatus(PaymentApi.PaymentStatusCommand
@@ -151,6 +186,7 @@ public class SystemIntegrationTest {
           .setMerchantId(merchant)
           .setPaymentId("payment-1")
           .build()).toCompletableFuture().get(10, SECONDS);
+      System.out.println("PAYMENT_STATUS FOR " + merchant + " END TIME: " + Instant.now().toString());
       assertNotNull(paymentStatusResponse);
       assertEquals(merchant, paymentStatusResponse.getMerchantId());
       assertEquals("payment-1", paymentStatusResponse.getPaymentId());

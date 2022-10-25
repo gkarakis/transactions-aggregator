@@ -1,6 +1,7 @@
 package io.aggregator.entity;
 
 import com.google.protobuf.Empty;
+import io.aggregator.TimeTo;
 import io.aggregator.api.StripedSecondApi;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
@@ -36,11 +37,82 @@ public class StripedSecondTest {
   }
 
   @Test
-  @Ignore("to be implemented")
   public void addLedgerItemsTest() {
     StripedSecondTestKit service = StripedSecondTestKit.of(StripedSecond::new);
-    // AddLedgerItemsCommand command = AddLedgerItemsCommand.newBuilder()...build();
-    // EventSourcedResult<Empty> result = service.addLedgerItems(command);
+    TimeTo.From now = TimeTo.fromNow();
+
+    StripedSecondApi.AddLedgerItemsCommand command1 = StripedSecondApi.AddLedgerItemsCommand.newBuilder()
+        .setMerchantId("tesco")
+        .setShopId("chelsea")
+        .setStripe(1)
+        .setEpochSecond(now.toEpochSecond())
+        .setTimestamp(now.toTimestamp())
+        .setTransactionId("txn-1")
+        .addLedgerItem(StripedSecondApi.LedgerItem.newBuilder()
+            .setAccountFrom("AF")
+            .setAccountTo("AT")
+            .setServiceCode("SVC1")
+            .setAmount("1.11")
+            .build())
+        .build();
+    StripedSecondApi.AddLedgerItemsCommand command2 = StripedSecondApi.AddLedgerItemsCommand.newBuilder()
+        .setMerchantId("tesco")
+        .setShopId("chelsea")
+        .setStripe(1)
+        .setEpochSecond(now.toEpochSecond())
+        .setTimestamp(now.toTimestamp())
+        .setTransactionId("txn-1")
+        .addLedgerItem(StripedSecondApi.LedgerItem.newBuilder()
+            .setAccountFrom("AF2")
+            .setAccountTo("AT2")
+            .setServiceCode("SVC1")
+            .setAmount("1.22")
+            .build())
+        .build();
+
+    EventSourcedResult<Empty> result = service.addLedgerItems(command1);
+    StripedSecondEntity.StripedSecondState state = service.getState();
+    assertEquals("tesco", state.getMerchantKey().getMerchantId());
+    assertEquals("chelsea", state.getShopId());
+    assertEquals(1, state.getStripe());
+    assertEquals(now.toEpochSecond(), state.getEpochSecond());
+    assertEquals(1, state.getLedgerEntriesCount());
+    assertEquals("txn-1", state.getLedgerEntries(0).getTransactionKey().getTransactionId());
+    assertEquals("AF", state.getLedgerEntries(0).getTransactionKey().getAccountFrom());
+    assertEquals("AT", state.getLedgerEntries(0).getTransactionKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgerEntries(0).getTransactionKey().getServiceCode());
+    assertEquals("1.11", state.getLedgerEntries(0).getAmount());
+
+    service.addLedgerItems(command1);
+    state = service.getState();
+    assertEquals("tesco", state.getMerchantKey().getMerchantId());
+    assertEquals("chelsea", state.getShopId());
+    assertEquals(1, state.getStripe());
+    assertEquals(now.toEpochSecond(), state.getEpochSecond());
+    assertEquals(1, state.getLedgerEntriesCount());
+    assertEquals("txn-1", state.getLedgerEntries(0).getTransactionKey().getTransactionId());
+    assertEquals("AF", state.getLedgerEntries(0).getTransactionKey().getAccountFrom());
+    assertEquals("AT", state.getLedgerEntries(0).getTransactionKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgerEntries(0).getTransactionKey().getServiceCode());
+    assertEquals("1.11", state.getLedgerEntries(0).getAmount());
+
+    service.addLedgerItems(command2);
+    state = service.getState();
+    assertEquals("tesco", state.getMerchantKey().getMerchantId());
+    assertEquals("chelsea", state.getShopId());
+    assertEquals(1, state.getStripe());
+    assertEquals(now.toEpochSecond(), state.getEpochSecond());
+    assertEquals(2, state.getLedgerEntriesCount());
+    assertEquals("txn-1", state.getLedgerEntries(0).getTransactionKey().getTransactionId());
+    assertEquals("AF", state.getLedgerEntries(0).getTransactionKey().getAccountFrom());
+    assertEquals("AT", state.getLedgerEntries(0).getTransactionKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgerEntries(0).getTransactionKey().getServiceCode());
+    assertEquals("1.11", state.getLedgerEntries(0).getAmount());
+    assertEquals("txn-1", state.getLedgerEntries(1).getTransactionKey().getTransactionId());
+    assertEquals("AF2", state.getLedgerEntries(1).getTransactionKey().getAccountFrom());
+    assertEquals("AT2", state.getLedgerEntries(1).getTransactionKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgerEntries(1).getTransactionKey().getServiceCode());
+    assertEquals("1.22", state.getLedgerEntries(1).getAmount());
   }
 
 
