@@ -1,13 +1,6 @@
 package io.aggregator.action;
 
-import akka.stream.javadsl.Source;
-import kalix.javasdk.testkit.ActionResult;
-import com.google.protobuf.Empty;
-import io.aggregator.action.FrontendAction;
-import io.aggregator.action.FrontendActionTestKit;
-import io.aggregator.action.FrontendService;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //

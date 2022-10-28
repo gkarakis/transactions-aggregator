@@ -1,15 +1,7 @@
 package io.aggregator.action;
 
-import akka.stream.javadsl.Source;
-import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
-import io.aggregator.action.StripedSecondToSecondAction;
-import io.aggregator.action.StripedSecondToSecondActionTestKit;
-import io.aggregator.entity.StripedSecondEntity;
-import kalix.javasdk.testkit.ActionResult;
-import org.junit.Ignore;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -19,7 +11,7 @@ import static org.junit.Assert.*;
 public class StripedSecondToSecondActionTest {
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void exampleTest() {
     StripedSecondToSecondActionTestKit service = StripedSecondToSecondActionTestKit.of(StripedSecondToSecondAction::new);
     // // use the testkit to execute a command
@@ -31,21 +23,21 @@ public class StripedSecondToSecondActionTest {
   }
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void onStripedSecondActivatedTest() {
     StripedSecondToSecondActionTestKit testKit = StripedSecondToSecondActionTestKit.of(StripedSecondToSecondAction::new);
     // ActionResult<Empty> result = testKit.onStripedSecondActivated(StripedSecondEntity.StripedSecondActivated.newBuilder()...build());
   }
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void onStripedSecondAggregatedTest() {
     StripedSecondToSecondActionTestKit testKit = StripedSecondToSecondActionTestKit.of(StripedSecondToSecondAction::new);
     // ActionResult<Empty> result = testKit.onStripedSecondAggregated(StripedSecondEntity.StripedSecondAggregated.newBuilder()...build());
   }
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void ignoreOtherEventsTest() {
     StripedSecondToSecondActionTestKit testKit = StripedSecondToSecondActionTestKit.of(StripedSecondToSecondAction::new);
     // ActionResult<Empty> result = testKit.ignoreOtherEvents(Any.newBuilder()...build());

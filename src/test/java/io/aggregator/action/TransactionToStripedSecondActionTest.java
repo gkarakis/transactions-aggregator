@@ -3,10 +3,10 @@ package io.aggregator.action;
 import io.aggregator.TimeTo;
 import io.aggregator.api.StripedSecondApi;
 import io.aggregator.entity.TransactionEntity;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 public class TransactionToStripedSecondActionTest {
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void exampleTest() {
     TransactionToStripedSecondActionTestKit service = TransactionToStripedSecondActionTestKit.of(TransactionToStripedSecondAction::new);
     // // use the testkit to execute a command
@@ -28,7 +28,7 @@ public class TransactionToStripedSecondActionTest {
   }
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void onIncidentAddedTest() {
     TransactionToStripedSecondActionTestKit testKit = TransactionToStripedSecondActionTestKit.of(TransactionToStripedSecondAction::new);
 
@@ -65,7 +65,7 @@ public class TransactionToStripedSecondActionTest {
   }
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void ignoreOtherEventsTest() {
     TransactionToStripedSecondActionTestKit testKit = TransactionToStripedSecondActionTestKit.of(TransactionToStripedSecondAction::new);
     // ActionResult<Empty> result = testKit.ignoreOtherEvents(Any.newBuilder()...build());

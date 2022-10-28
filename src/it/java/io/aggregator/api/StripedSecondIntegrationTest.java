@@ -1,14 +1,12 @@
 package io.aggregator.api;
 
-import com.google.protobuf.Empty;
 import io.aggregator.Main;
-import io.aggregator.entity.StripedSecondEntity;
-import kalix.javasdk.testkit.junit.KalixTestKitResource;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import static java.util.concurrent.TimeUnit.*;
+import kalix.javasdk.Kalix;
+import kalix.javasdk.testkit.KalixTestKit;
+import kalix.javasdk.testkit.junit.jupiter.KalixDescriptor;
+import kalix.javasdk.testkit.junit.jupiter.KalixTest;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -17,14 +15,15 @@ import static java.util.concurrent.TimeUnit.*;
 
 // Example of an integration test calling our service via the Kalix proxy
 // Run all test classes ending with "IntegrationTest" using `mvn verify -Pit`
+@KalixTest
 public class StripedSecondIntegrationTest {
 
   /**
    * The test kit starts both the service container and the Kalix proxy.
    */
-  @ClassRule
-  public static final KalixTestKitResource testKit =
-    new KalixTestKitResource(Main.createKalix());
+  @KalixDescriptor
+  public static final Kalix kalix = Main.createKalix();
+  public static final KalixTestKit testKit = new KalixTestKit(kalix);
 
   /**
    * Use the generated gRPC client to call the service through the Kalix proxy.
@@ -32,11 +31,12 @@ public class StripedSecondIntegrationTest {
   private final StripedSecond client;
 
   public StripedSecondIntegrationTest() {
+    testKit.start();
     client = testKit.getGrpcClient(StripedSecond.class);
   }
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void addLedgerItemsOnNonExistingEntity() throws Exception {
     // TODO: set fields in command, and provide assertions to match replies
     // client.addLedgerItems(StripedSecondApi.AddLedgerItemsCommand.newBuilder().build())
@@ -44,7 +44,7 @@ public class StripedSecondIntegrationTest {
   }
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void aggregateStripedSecondOnNonExistingEntity() throws Exception {
     // TODO: set fields in command, and provide assertions to match replies
     // client.aggregateStripedSecond(StripedSecondApi.AggregateStripedSecondCommand.newBuilder().build())

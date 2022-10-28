@@ -3,13 +3,11 @@ package io.aggregator.entity;
 import com.google.protobuf.Empty;
 import io.aggregator.TimeTo;
 import io.aggregator.api.StripedSecondApi;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import kalix.javasdk.testkit.EventSourcedResult;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -19,7 +17,7 @@ import static org.junit.Assert.*;
 public class StripedSecondTest {
 
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void exampleTest() {
     StripedSecondTestKit service = StripedSecondTestKit.of(StripedSecond::new);
     // // use the testkit to execute a command
@@ -115,9 +113,8 @@ public class StripedSecondTest {
     assertEquals("1.22", state.getLedgerEntries(1).getAmount());
   }
 
-
   @Test
-  @Ignore("to be implemented")
+  @Disabled("to be implemented")
   public void aggregateStripedSecondTest() {
     StripedSecondTestKit service = StripedSecondTestKit.of(StripedSecond::new);
     // AggregateStripedSecondCommand command = AggregateStripedSecondCommand.newBuilder()...build();

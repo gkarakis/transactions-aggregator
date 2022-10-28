@@ -6,16 +6,18 @@ import io.aggregator.Main;
 import io.aggregator.entity.TransactionMerchantKey;
 import io.aggregator.view.IncidentsByDate;
 import io.aggregator.view.IncidentsByDateModel;
-import kalix.javasdk.testkit.junit.KalixTestKitResource;
-import org.junit.ClassRule;
-import org.junit.Test;
+import kalix.javasdk.Kalix;
+import kalix.javasdk.testkit.KalixTestKit;
+import kalix.javasdk.testkit.junit.jupiter.KalixDescriptor;
+import kalix.javasdk.testkit.junit.jupiter.KalixTest;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.Date;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -24,14 +26,15 @@ import static org.junit.Assert.assertTrue;
 
 // Example of an integration test calling our service via the Kalix proxy
 // Run all test classes ending with "IntegrationTest" using `mvn verify -Pit`
+@KalixTest
 public class IncidentViewIntegrationTest {
 
   /**
    * The test kit starts both the service container and the Kalix proxy.
    */
-  @ClassRule
-  public static final KalixTestKitResource testKit =
-    new KalixTestKitResource(Main.createKalix());
+  @KalixDescriptor
+  public static final Kalix kalix = Main.createKalix();
+  public static final KalixTestKit testKit = new KalixTestKit(kalix);
 
   /**
    * Use the generated gRPC client to call the service through the Kalix proxy.
@@ -40,6 +43,7 @@ public class IncidentViewIntegrationTest {
   private final IncidentsByDate view;
 
   public IncidentViewIntegrationTest() {
+    testKit.start();
     client = testKit.getGrpcClient(Incident.class);
     view = testKit.getGrpcClient(IncidentsByDate.class);
   }

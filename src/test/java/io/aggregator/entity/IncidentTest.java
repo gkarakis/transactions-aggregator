@@ -1,18 +1,14 @@
 package io.aggregator.entity;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.aggregator.api.IncidentApi;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
-import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
-import kalix.javasdk.testkit.EventSourcedResult;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -66,7 +62,7 @@ public class IncidentTest {
             .setPaymentId(paymentId)
             .setTimestamp(t).build();
     var addPaymentResponse = service.addPayment(addPaymentCommand);
-    assertEquals(false, addPaymentResponse.isError());
+    assertFalse(addPaymentResponse.isError());
     var incidentPaymentAdded = addPaymentResponse.getNextEventOfType(IncidentEntity.IncidentPaymentAdded.class);
 
     assertEquals(paymentId,incidentPaymentAdded.getPaymentId());

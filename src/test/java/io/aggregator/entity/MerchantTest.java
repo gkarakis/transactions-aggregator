@@ -1,13 +1,12 @@
 package io.aggregator.entity;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import io.aggregator.TimeTo;
 import io.aggregator.api.MerchantApi;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -83,7 +82,7 @@ public class MerchantTest {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void merchantAggregationRequestTestWithOneDay() {
     MerchantTestKit testKit = MerchantTestKit.of(Merchant::new);
 
@@ -110,7 +109,7 @@ public class MerchantTest {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void merchantAggregationRequestTestWithMultipleDays() {
     MerchantTestKit testKit = MerchantTestKit.of(Merchant::new);
 
@@ -141,7 +140,7 @@ public class MerchantTest {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void merchantAggregationRequestTestWithMultiplePayments() {
     MerchantTestKit testKit = MerchantTestKit.of(Merchant::new);
 
@@ -216,7 +215,7 @@ public class MerchantTest {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void merchantPaymentRequestTestWithMultipleDays() {
     MerchantTestKit testKit = MerchantTestKit.of(Merchant::new);
 
@@ -243,7 +242,7 @@ public class MerchantTest {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void merchantPaymentRequestTestWithMultipleRequestsOnePayments() {
     MerchantTestKit testKit = MerchantTestKit.of(Merchant::new);
 

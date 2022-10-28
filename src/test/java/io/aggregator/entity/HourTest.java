@@ -1,16 +1,15 @@
 package io.aggregator.entity;
 
+import com.google.protobuf.Timestamp;
 import io.aggregator.TimeTo;
 import io.aggregator.api.HourApi;
-
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import com.google.protobuf.Timestamp;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //

@@ -2,10 +2,10 @@ package io.aggregator.entity;
 
 import io.aggregator.TimeTo;
 import io.aggregator.api.TransactionApi;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 
 public class TransactionTest {
 
-  @Ignore
+  @Disabled
   @Test
   public void exampleTest() {
     // TransactionTestKit testKit = TransactionTestKit.of(Transaction::new);

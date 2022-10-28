@@ -2,14 +2,16 @@ package io.aggregator.api;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.aggregator.view.IncidentsByDate;
-import io.aggregator.view.IncidentsByDateModel;
-import kalix.javasdk.testkit.junit.KalixTestKitResource;
 import io.aggregator.Main;
 import io.aggregator.TimeTo;
 import io.aggregator.entity.TransactionMerchantKey;
-import org.junit.ClassRule;
-import org.junit.Test;
+import io.aggregator.view.IncidentsByDate;
+import io.aggregator.view.IncidentsByDateModel;
+import kalix.javasdk.Kalix;
+import kalix.javasdk.testkit.KalixTestKit;
+import kalix.javasdk.testkit.junit.jupiter.KalixDescriptor;
+import kalix.javasdk.testkit.junit.jupiter.KalixTest;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,7 +20,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
@@ -27,14 +29,15 @@ import static org.junit.Assert.*;
 
 // Example of an integration test calling our service via the Kalix proxy
 // Run all test classes ending with "IntegrationTest" using `mvn verify -Pit`
+@KalixTest
 public class SystemIntegrationTest {
 
   /**
    * The test kit starts both the service container and the Kalix proxy.
    */
-  @ClassRule
-  public static final KalixTestKitResource testKit =
-    new KalixTestKitResource(Main.createKalix());
+  @KalixDescriptor
+  public static final Kalix kalix = Main.createKalix();
+  public static final KalixTestKit testKit = new KalixTestKit(kalix);
 
   /**
    * Use the generated gRPC client to call the service through the Kalix proxy.
@@ -45,6 +48,7 @@ public class SystemIntegrationTest {
   private final IncidentsByDate incidentsView;
 
   public SystemIntegrationTest() {
+    testKit.start();
     transactionClient = testKit.getGrpcClient(Transaction.class);
     merchantClient = testKit.getGrpcClient(Merchant.class);
     paymentClient = testKit.getGrpcClient(Payment.class);
@@ -77,8 +81,8 @@ public class SystemIntegrationTest {
             .setMerchantId("tesco")
             .setPaymentId("0")
             .build();
-    var unPayedIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(1,unPayedIncidentsByMerchantAndDateRes.getResultsCount());
+    var unPaidIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,unPaidIncidentsByMerchantAndDateRes.getResultsCount());
 
     merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand
         .newBuilder()
@@ -105,8 +109,8 @@ public class SystemIntegrationTest {
     assertEquals("1.01", moneyMovement.getAmount());
 
     //check
-    unPayedIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(0,unPayedIncidentsByMerchantAndDateRes.getResultsCount());
+    unPaidIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(0,unPaidIncidentsByMerchantAndDateRes.getResultsCount());
 
     var payedIncidentsByMerchantAndDateReq = unPayedIncidentsByMerchantAndDateReq
             .toBuilder()
@@ -115,10 +119,6 @@ public class SystemIntegrationTest {
     var payedIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(payedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
     assertEquals(1,payedIncidentsByMerchantAndDateRes.getResultsCount());
     assertEquals("payment-1", payedIncidentsByMerchantAndDateRes.getResults(0).getPaymentId());
-
-
-
-
   }
 
   @Test

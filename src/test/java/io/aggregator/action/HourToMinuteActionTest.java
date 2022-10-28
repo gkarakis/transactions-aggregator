@@ -1,14 +1,6 @@
 package io.aggregator.action;
 
-import akka.stream.javadsl.Source;
-import kalix.javasdk.testkit.ActionResult;
-import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
-import io.aggregator.action.HourToMinuteAction;
-import io.aggregator.action.HourToMinuteActionTestKit;
-import io.aggregator.entity.HourEntity;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 //
