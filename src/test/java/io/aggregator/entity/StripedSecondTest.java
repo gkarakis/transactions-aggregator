@@ -74,12 +74,12 @@ public class StripedSecondTest {
     assertEquals("chelsea", state.getShopId());
     assertEquals(1, state.getStripe());
     assertEquals(now.toEpochSecond(), state.getEpochSecond());
-    assertEquals(1, state.getLedgerEntriesCount());
-    assertEquals("txn-1", state.getLedgerEntries(0).getTransactionKey().getTransactionId());
-    assertEquals("AF", state.getLedgerEntries(0).getTransactionKey().getAccountFrom());
-    assertEquals("AT", state.getLedgerEntries(0).getTransactionKey().getAccountTo());
-    assertEquals("SVC1", state.getLedgerEntries(0).getTransactionKey().getServiceCode());
-    assertEquals("1.11", state.getLedgerEntries(0).getAmount());
+    assertEquals(1, state.getLedgeringActivityCount());
+    assertEquals("txn-1", state.getLedgeringActivity(0).getTransactionKey().getTransactionId());
+    assertEquals("AF", state.getLedgeringActivity(0).getTransactionKey().getAccountFrom());
+    assertEquals("AT", state.getLedgeringActivity(0).getTransactionKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgeringActivity(0).getTransactionKey().getServiceCode());
+    assertEquals("1.11", state.getLedgeringActivity(0).getAmount());
 
     service.addLedgerItems(command1);
     state = service.getState();
@@ -87,12 +87,12 @@ public class StripedSecondTest {
     assertEquals("chelsea", state.getShopId());
     assertEquals(1, state.getStripe());
     assertEquals(now.toEpochSecond(), state.getEpochSecond());
-    assertEquals(1, state.getLedgerEntriesCount());
-    assertEquals("txn-1", state.getLedgerEntries(0).getTransactionKey().getTransactionId());
-    assertEquals("AF", state.getLedgerEntries(0).getTransactionKey().getAccountFrom());
-    assertEquals("AT", state.getLedgerEntries(0).getTransactionKey().getAccountTo());
-    assertEquals("SVC1", state.getLedgerEntries(0).getTransactionKey().getServiceCode());
-    assertEquals("1.11", state.getLedgerEntries(0).getAmount());
+    assertEquals(1, state.getLedgeringActivityCount());
+    assertEquals("txn-1", state.getLedgeringActivity(0).getTransactionKey().getTransactionId());
+    assertEquals("AF", state.getLedgeringActivity(0).getTransactionKey().getAccountFrom());
+    assertEquals("AT", state.getLedgeringActivity(0).getTransactionKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgeringActivity(0).getTransactionKey().getServiceCode());
+    assertEquals("1.11", state.getLedgeringActivity(0).getAmount());
 
     service.addLedgerItems(command2);
     state = service.getState();
@@ -100,17 +100,17 @@ public class StripedSecondTest {
     assertEquals("chelsea", state.getShopId());
     assertEquals(1, state.getStripe());
     assertEquals(now.toEpochSecond(), state.getEpochSecond());
-    assertEquals(2, state.getLedgerEntriesCount());
-    assertEquals("txn-1", state.getLedgerEntries(0).getTransactionKey().getTransactionId());
-    assertEquals("AF", state.getLedgerEntries(0).getTransactionKey().getAccountFrom());
-    assertEquals("AT", state.getLedgerEntries(0).getTransactionKey().getAccountTo());
-    assertEquals("SVC1", state.getLedgerEntries(0).getTransactionKey().getServiceCode());
-    assertEquals("1.11", state.getLedgerEntries(0).getAmount());
-    assertEquals("txn-1", state.getLedgerEntries(1).getTransactionKey().getTransactionId());
-    assertEquals("AF2", state.getLedgerEntries(1).getTransactionKey().getAccountFrom());
-    assertEquals("AT2", state.getLedgerEntries(1).getTransactionKey().getAccountTo());
-    assertEquals("SVC1", state.getLedgerEntries(1).getTransactionKey().getServiceCode());
-    assertEquals("1.22", state.getLedgerEntries(1).getAmount());
+    assertEquals(2, state.getLedgeringActivityCount());
+    assertEquals("txn-1", state.getLedgeringActivity(0).getTransactionKey().getTransactionId());
+    assertEquals("AF", state.getLedgeringActivity(0).getTransactionKey().getAccountFrom());
+    assertEquals("AT", state.getLedgeringActivity(0).getTransactionKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgeringActivity(0).getTransactionKey().getServiceCode());
+    assertEquals("1.11", state.getLedgeringActivity(0).getAmount());
+    assertEquals("txn-1", state.getLedgeringActivity(1).getTransactionKey().getTransactionId());
+    assertEquals("AF2", state.getLedgeringActivity(1).getTransactionKey().getAccountFrom());
+    assertEquals("AT2", state.getLedgeringActivity(1).getTransactionKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgeringActivity(1).getTransactionKey().getServiceCode());
+    assertEquals("1.22", state.getLedgeringActivity(1).getAmount());
   }
 
   @Test

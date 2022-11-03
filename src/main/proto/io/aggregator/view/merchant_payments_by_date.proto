@@ -11,6 +11,8 @@ import "io/aggregator/view/merchant_payments.proto";
 
 option java_outer_classname = "MerchantPaymentsByDateModel";
 
+// TODO - GK USE THIS
+
 service MerchantPaymentsByDate {
   option (kalix.codegen) = {
     view: {}

@@ -8,49 +8,49 @@ import "io/aggregator/entity/transaction_merchant_key.proto";
 
 package io.aggregator.api;
 
-option java_outer_classname = "IncidentApi";
+option java_outer_classname = "LedgerEntryApi";
 
-service Incident {
+service LedgerEntry {
   option (kalix.codegen) = {
     event_sourced_entity: {
-      name: "io.aggregator.entity.Incident"
-      entity_type: "incident"
-      state: "io.aggregator.entity.IncidentState"
+      name: "io.aggregator.entity.LedgerEntry"
+      entity_type: "ledger_entry"
+      state: "io.aggregator.entity.LedgerEntryState"
       events: [
-        "io.aggregator.entity.IncidentCreated",
-        "io.aggregator.entity.IncidentPaymentAdded"
+        "io.aggregator.entity.LedgerEntryCreated",
+        "io.aggregator.entity.LedgerEntryPaymentAdded"
       ]
     }
   };
 
-  rpc CreateIncident(CreateIncidentCommand) returns (google.protobuf.Empty) {
+  rpc CreateLedgerEntry(CreateLedgerEntryCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/incident/create"
+      post: "/ledger-entry/create"
       body: "*"
     };
   }
   rpc AddPayment(AddPaymentCommand) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/incident/add-payment"
+      post: "/ledger-entry/add-payment"
       body: "*"
     };
   }
 
-  rpc GetIncident(GetIncidentRequest) returns (GetIncidentResponse) {
+  rpc GetLedgerEntry(GetLedgerEntryRequest) returns (GetLedgerEntryResponse) {
     option (google.api.http) = {
-      post: "/incident/get"
+      post: "/ledger-entry/get"
       body: "*"
     };
   }
 }
 
-message CreateIncidentCommand {
+message CreateLedgerEntryCommand {
   string transaction_id = 1[(kalix.field).entity_key = true];
   string service_code = 2[(kalix.field).entity_key = true];
   string account_from = 3[(kalix.field).entity_key = true];
   string account_to = 4[(kalix.field).entity_key = true];
   google.protobuf.Timestamp timestamp = 5;
-  string incident_amount = 6;
+  string amount = 6;
   string shop_id = 7;
   string merchant_id = 8;
 }
@@ -64,14 +64,14 @@ message AddPaymentCommand {
   string payment_id = 6;
 }
 
-message GetIncidentRequest {
+message GetLedgerEntryRequest {
   string transaction_id = 1[(kalix.field).entity_key = true];
   string service_code = 2[(kalix.field).entity_key = true];
   string account_from = 3[(kalix.field).entity_key = true];
   string account_to = 4[(kalix.field).entity_key = true];
 }
 
-message GetIncidentResponse {
-  string incident_amount = 1;
+message GetLedgerEntryResponse {
+  string amount = 1;
   string payment_id = 2;
 }

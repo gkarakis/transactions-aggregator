@@ -5,8 +5,10 @@ import com.google.protobuf.util.Timestamps;
 import io.aggregator.Main;
 import io.aggregator.TimeTo;
 import io.aggregator.entity.TransactionMerchantKey;
-import io.aggregator.view.IncidentsByDate;
-import io.aggregator.view.IncidentsByDateModel;
+import io.aggregator.view.LedgerEntriesByDate;
+import io.aggregator.view.LedgerEntriesByDateModel;
+import io.aggregator.view.LedgerEntriesByTransaction;
+import io.aggregator.view.LedgerEntriesByTransactionModel;
 import kalix.javasdk.Kalix;
 import kalix.javasdk.testkit.KalixTestKit;
 import kalix.javasdk.testkit.junit.jupiter.KalixDescriptor;
@@ -45,14 +47,16 @@ public class SystemIntegrationTest {
   private final Transaction transactionClient;
   private final Merchant merchantClient;
   private final Payment paymentClient;
-  private final IncidentsByDate incidentsView;
+  private final LedgerEntriesByDate ledgerEntriesByDateView;
+  private final LedgerEntriesByTransaction ledgerEntriesByTransactionView;
 
   public SystemIntegrationTest() {
     testKit.start();
     transactionClient = testKit.getGrpcClient(Transaction.class);
     merchantClient = testKit.getGrpcClient(Merchant.class);
     paymentClient = testKit.getGrpcClient(Payment.class);
-    incidentsView = testKit.getGrpcClient(IncidentsByDate.class);
+    ledgerEntriesByDateView = testKit.getGrpcClient(LedgerEntriesByDate.class);
+    ledgerEntriesByTransactionView = testKit.getGrpcClient(LedgerEntriesByTransaction.class);
   }
 
   @Test
@@ -70,19 +74,25 @@ public class SystemIntegrationTest {
             .setServiceCode("SVC1")
             .build())
         .build()).toCompletableFuture().get(10, SECONDS);
-    Thread.sleep(20000);
+    Thread.sleep(10000);
     System.out.println("PAYMENT_PRICED END TIME: " + Instant.now().toString());
 
     Timestamp from = Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli());
     Timestamp to = Timestamps.fromMillis(Instant.now().toEpochMilli());
-    var unPayedIncidentsByMerchantAndDateReq = IncidentsByDateModel.IncidentsByDateRequest.newBuilder()
+    var unPaidLedgerEntriesByMerchantAndDateReq = LedgerEntriesByDateModel.LedgerEntriesByDateRequest.newBuilder()
             .setFromDate(from)
             .setToDate(to)
             .setMerchantId("tesco")
             .setPaymentId("0")
             .build();
-    var unPaidIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(1,unPaidIncidentsByMerchantAndDateRes.getResultsCount());
+    var unPaidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(unPaidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,unPaidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+    var ledgerEntriesByTransactionRequest = LedgerEntriesByTransactionModel.LedgerEntriesByTransactionRequest.newBuilder()
+        .setTransactionId("txn-1")
+        .build();
+    var ledgerEntriesByTransactionRes = ledgerEntriesByTransactionView.getLedgerEntriesByTransaction(ledgerEntriesByTransactionRequest).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1, ledgerEntriesByTransactionRes.getResultsCount());
+    assertEquals("0", ledgerEntriesByTransactionRes.getResults(0).getPaymentId());
 
     merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand
         .newBuilder()
@@ -109,16 +119,19 @@ public class SystemIntegrationTest {
     assertEquals("1.01", moneyMovement.getAmount());
 
     //check
-    unPaidIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(unPayedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(0,unPaidIncidentsByMerchantAndDateRes.getResultsCount());
+    unPaidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(unPaidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(0,unPaidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+    ledgerEntriesByTransactionRes = ledgerEntriesByTransactionView.getLedgerEntriesByTransaction(ledgerEntriesByTransactionRequest).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1, ledgerEntriesByTransactionRes.getResultsCount());
+    assertEquals("payment-1", ledgerEntriesByTransactionRes.getResults(0).getPaymentId());
 
-    var payedIncidentsByMerchantAndDateReq = unPayedIncidentsByMerchantAndDateReq
+    var paidLedgerEntriesByMerchantAndDateReq = unPaidLedgerEntriesByMerchantAndDateReq
             .toBuilder()
             .setPaymentId("payment-1")
             .build();
-    var payedIncidentsByMerchantAndDateRes = incidentsView.getIncidentsByDate(payedIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(1,payedIncidentsByMerchantAndDateRes.getResultsCount());
-    assertEquals("payment-1", payedIncidentsByMerchantAndDateRes.getResults(0).getPaymentId());
+    var paidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(paidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1,paidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+    assertEquals("payment-1", paidLedgerEntriesByMerchantAndDateRes.getResults(0).getPaymentId());
   }
 
   @Test

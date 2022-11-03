@@ -2,7 +2,7 @@ package io.aggregator.action;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
-import io.aggregator.api.IncidentApi;
+import io.aggregator.api.LedgerEntryApi;
 import io.aggregator.entity.StripedSecondEntity;
 import kalix.javasdk.action.ActionCreationContext;
 import org.slf4j.Logger;
@@ -31,16 +31,16 @@ public class StripedSecondToIncidentAction extends AbstractStripedSecondToIncide
     log.info(Thread.currentThread().getName() + " - ON EVENT: StripedSecondLedgerItemsAdded");
 
     List<CompletableFuture<Empty>> executes =
-    event.getLedgerEntriesList().stream().map(ledgerEntry ->
-      components().incident().createIncident(
-              IncidentApi.CreateIncidentCommand.newBuilder()
+    event.getLedgeringActivityList().stream().map(ledgerEntry ->
+      components().ledgerEntry().createLedgerEntry(
+              LedgerEntryApi.CreateLedgerEntryCommand.newBuilder()
                       .setTransactionId(ledgerEntry.getTransactionKey().getTransactionId())
                       .setMerchantId(event.getMerchantKey().getMerchantId())
                       .setShopId(event.getShopId())
                       .setServiceCode(ledgerEntry.getTransactionKey().getServiceCode())
                       .setAccountFrom(ledgerEntry.getTransactionKey().getAccountFrom())
                       .setAccountTo(ledgerEntry.getTransactionKey().getAccountTo())
-                      .setIncidentAmount(ledgerEntry.getAmount())
+                      .setAmount(ledgerEntry.getAmount())
                       .setTimestamp(event.getTimestamp())
                       .build()
       ).execute().toCompletableFuture()
@@ -56,8 +56,8 @@ public class StripedSecondToIncidentAction extends AbstractStripedSecondToIncide
 
     List<CompletableFuture<Empty>> executes =
             event.getMoneyMovementsList().stream().map(moneyMovement ->
-                    components().incident().addPayment(
-                            IncidentApi.AddPaymentCommand.newBuilder()
+                    components().ledgerEntry().addPayment(
+                            LedgerEntryApi.AddPaymentCommand.newBuilder()
                                     .setTransactionId(moneyMovement.getTransactionId())
                                     .setServiceCode(moneyMovement.getServiceCode())
                                     .setAccountFrom(moneyMovement.getAccountFrom())

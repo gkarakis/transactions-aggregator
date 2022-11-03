@@ -24,7 +24,7 @@ public final class Main {
     return KalixFactory.withComponents(
       Day::new,
       Hour::new,
-      Incident::new,
+      LedgerEntry::new,
       Merchant::new,
       Minute::new,
       Payment::new,
@@ -37,7 +37,8 @@ public final class Main {
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
-      IncidentsByDateView::new,
+      LedgerEntriesByDateView::new,
+      LedgerEntriesByTransactionView::new,
       MerchantPaymentsByDateView::new,
       MerchantPaymentsByMerchantByDateView::new,
       MerchantToDayAction::new,

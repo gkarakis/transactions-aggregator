@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package io.aggregator.entity;
+
+option java_outer_classname = "LedgerEntryEntity";
+
+
+message LedgerEntryCreated {
+  LedgerEntryKey ledger_entry_key = 1;
+  google.protobuf.Timestamp incident_timestamp = 2;
+  string amount = 3;
+  string shop_id = 4;
+  string merchant_id = 5;
+}
+
+message LedgerEntryPaymentAdded {
+  LedgerEntryKey ledger_entry_key = 1;
+  google.protobuf.Timestamp payment_timestamp = 2;
+  string payment_id = 3;
+}
+
+message LedgerEntryState {
+  LedgerEntryKey ledger_entry_key = 1;
+  string amount = 2;
+  string payment_id = 3;
+}
+
+message LedgerEntryKey {
+  string transaction_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+}

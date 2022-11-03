@@ -66,7 +66,7 @@ public class StripedSecond extends AbstractStripedSecond {
     log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: AddLedgerItemsCommand");
 
     boolean newEntry = command.getLedgerItemList().stream()
-        .allMatch(ledgerItem -> state.getLedgerEntriesList().stream()
+        .allMatch(ledgerItem -> state.getLedgeringActivityList().stream()
             .noneMatch(existingLedgerEntry -> existingLedgerEntry.getTransactionKey().getTransactionId().equals(command.getTransactionId()) &&
                     existingLedgerEntry.getTransactionKey().getServiceCode().equals(ledgerItem.getServiceCode()) &&
                     existingLedgerEntry.getTransactionKey().getAccountFrom().equals(ledgerItem.getAccountFrom()) &&
@@ -113,18 +113,18 @@ public class StripedSecond extends AbstractStripedSecond {
     log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: StripedSecondLedgerItemsAdded");
 
     var newState = state.toBuilder();
-    event.getLedgerEntriesList()
+    event.getLedgeringActivityList()
 //        .filter(ledgerEntry -> state.getLedgerEntriesList().stream()
 //            .noneMatch(existingLedgerEntry -> existingLedgerEntry.getTransactionKey().equals(ledgerEntry.getTransactionKey()) &&
 //                existingLedgerEntry.getTimestamp().equals(ledgerEntry.getTimestamp())))
-        .forEach(newState::addLedgerEntries);
+        .forEach(newState::addLedgeringActivity);
     return newState.setShopId(event.getShopId()).build();
   }
 
   static StripedSecondEntity.StripedSecondState handle(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondAggregated event) {
     log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: StripedSecondAggregated");
 
-    var ledgerEntries = state.getLedgerEntriesList().stream()
+    var ledgerEntries = state.getLedgeringActivityList().stream()
         .map(ledgerEntry -> {
           if (ledgerEntry.getAggregateRequestTimestamp().getSeconds() == 0) {
             return ledgerEntry.toBuilder()
@@ -137,8 +137,8 @@ public class StripedSecond extends AbstractStripedSecond {
         .toList();
 
     return state.toBuilder()
-        .clearLedgerEntries()
-        .addAllLedgerEntries(ledgerEntries)
+        .clearLedgeringActivity()
+        .addAllLedgeringActivity(ledgerEntries)
         .build();
   }
 
@@ -154,9 +154,9 @@ public class StripedSecond extends AbstractStripedSecond {
         .setEpochSecond(command.getEpochSecond())
         .setStripe(command.getStripe())
         .setTimestamp(command.getTimestamp())
-        .addAllLedgerEntries(
+        .addAllLedgeringActivity(
             command.getLedgerItemList().stream()
-                .map(ledgerItem -> StripedSecondEntity.LedgerEntry.newBuilder()
+                .map(ledgerItem -> StripedSecondEntity.LedgeringActivity.newBuilder()
                     .setTransactionKey(TransactionMerchantKey.TransactionKey.newBuilder()
                         .setTransactionId(command.getTransactionId())
                         .setServiceCode(ledgerItem.getServiceCode())
@@ -172,7 +172,7 @@ public class StripedSecond extends AbstractStripedSecond {
         )
         .build();
 
-    var isInactive = state.getLedgerEntriesCount() == 0 || state.getLedgerEntriesList().stream()
+    var isInactive = state.getLedgeringActivityCount() == 0 || state.getLedgeringActivityList().stream()
         .allMatch(transaction -> transaction.getAggregateRequestTimestamp().getSeconds() > 0);
 
     if (isInactive) {
@@ -192,7 +192,7 @@ public class StripedSecond extends AbstractStripedSecond {
   }
 
   static List<?> eventsFor(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AggregateStripedSecondCommand command) {
-    var ledgerEntries = state.getLedgerEntriesList().stream()
+    var ledgerEntries = state.getLedgeringActivityList().stream()
         .filter(ledgerEntry -> ledgerEntry.getAggregateRequestTimestamp().getSeconds() == 0)
         .toList();
 
@@ -226,7 +226,7 @@ public class StripedSecond extends AbstractStripedSecond {
                 .build());
           });
       var lastUpdate = ledgerEntries.stream()
-          .map(StripedSecondEntity.LedgerEntry::getTimestamp)
+          .map(StripedSecondEntity.LedgeringActivity::getTimestamp)
           .max(TimeTo.comparator())
           .get();
 

@@ -6,68 +6,68 @@ import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
 import "kalix/annotations.proto";
 import "google/protobuf/timestamp.proto";
-import "io/aggregator/entity/incident_entity.proto";
+import "io/aggregator/entity/ledger_entry_entity.proto";
 
-option java_outer_classname = "IncidentsByDateModel";
+option java_outer_classname = "LedgerEntriesByDateModel";
 
-service IncidentsByDate {
+service LedgerEntriesByDate {
   option (kalix.codegen) = {
     view: {}
   };
 
-  rpc GetIncidentsByDate(IncidentsByDateRequest) returns (IncidentsByDateResponse) {
+  rpc GetLedgerEntriesByDate(LedgerEntriesByDateRequest) returns (LedgerEntriesByDateResponse) {
     option (kalix.method).view.query = {
       query: "SELECT * AS results"
-             "  FROM incidents_by_date"
+             "  FROM ledger_entries_by_date"
              " WHERE incident_timestamp.seconds >= :`from_date.seconds`"
              "   AND incident_timestamp.seconds < :`to_date.seconds`"
              "   AND merchant_id = :merchant_id"
              "   AND payment_id = :payment_id"
     };
     option (google.api.http) = {
-      get: "/incidents-by-date"
+      get: "/ledger-entries-by-date"
     };
   }
 
-  rpc OnIncidentCreated(entity.IncidentCreated) returns (IncidentByDateViewState) {
+  rpc OnLedgerEntryCreated(entity.LedgerEntryCreated) returns (LedgerEntriesByDateViewState) {
     option (kalix.method).eventing.in = {
-      event_sourced_entity: "incident"
+      event_sourced_entity: "ledger_entry"
     };
     option (kalix.method).view.update = {
-      table: "incidents_by_date"
+      table: "ledger_entries_by_date"
       transform_updates: true
     };
   }
 
-  rpc OnIncidentPaymentAdded(entity.IncidentPaymentAdded) returns (IncidentByDateViewState) {
+  rpc OnLedgerEntryPaymentAdded(entity.LedgerEntryPaymentAdded) returns (LedgerEntriesByDateViewState) {
     option (kalix.method).eventing.in = {
-      event_sourced_entity: "incident"
+      event_sourced_entity: "ledger_entry"
     };
     option (kalix.method).view.update = {
-      table: "incidents_by_date"
+      table: "ledger_entries_by_date"
       transform_updates: true
     };
   }
 
-  rpc IgnoreOtherEvents(google.protobuf.Any) returns (IncidentByDateViewState) {
+  rpc IgnoreOtherEvents(google.protobuf.Any) returns (LedgerEntriesByDateViewState) {
     option (kalix.method).eventing.in = {
-      event_sourced_entity: "incident"
+      event_sourced_entity: "ledger_entry"
     };
     option (kalix.method).view.update = {
-      table: "incidents_by_date"
+      table: "ledger_entries_by_date"
       transform_updates: true
     };
   }
 }
 
-message IncidentsByDateRequest {
+message LedgerEntriesByDateRequest {
   google.protobuf.Timestamp from_date = 1;
   google.protobuf.Timestamp to_date = 2;
   string merchant_id = 3;
   string payment_id = 4;
 }
 
-message IncidentByDateViewState {
+message LedgerEntriesByDateViewState {
   string transaction_id = 1;
   string service_code = 2;
   string account_from = 3;
@@ -75,10 +75,10 @@ message IncidentByDateViewState {
   string shop_id = 5;
   string merchant_id = 6;
   google.protobuf.Timestamp incident_timestamp = 7;
-  string incident_amount = 8;
+  string amount = 8;
   string payment_id = 9;
 }
 
-message IncidentsByDateResponse {
-  repeated IncidentByDateViewState results = 1;
+message LedgerEntriesByDateResponse {
+  repeated LedgerEntriesByDateViewState results = 1;
 }

@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
+import "kalix/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/ledger_entry_entity.proto";
+
+option java_outer_classname = "LedgerEntriesByTransactionModel";
+
+service LedgerEntriesByTransaction {
+  option (kalix.codegen) = {
+    view: {}
+  };
+
+  rpc GetLedgerEntriesByTransaction(LedgerEntriesByTransactionRequest) returns (LedgerEntriesByTransactionResponse) {
+    option (kalix.method).view.query = {
+      query: "SELECT * AS results"
+             " FROM ledger_entries_by_transaction"
+             " WHERE transaction_id = :transaction_id"
+    };
+    option (google.api.http) = {
+      get: "/ledger-entries-by-transaction"
+    };
+  }
+
+  rpc OnLedgerEntryCreated(entity.LedgerEntryCreated) returns (LedgerEntriesByTransactionViewState) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "ledger_entry"
+    };
+    option (kalix.method).view.update = {
+      table: "ledger_entries_by_transaction"
+      transform_updates: true
+    };
+  }
+
+  rpc OnLedgerEntryPaymentAdded(entity.LedgerEntryPaymentAdded) returns (LedgerEntriesByTransactionViewState) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "ledger_entry"
+    };
+    option (kalix.method).view.update = {
+      table: "ledger_entries_by_transaction"
+      transform_updates: true
+    };
+  }
+
+  rpc IgnoreOtherEvents(google.protobuf.Any) returns (LedgerEntriesByTransactionViewState) {
+    option (kalix.method).eventing.in = {
+      event_sourced_entity: "ledger_entry"
+    };
+    option (kalix.method).view.update = {
+      table: "ledger_entries_by_transaction"
+      transform_updates: true
+    };
+  }
+}
+
+message LedgerEntriesByTransactionRequest {
+  string transaction_id = 1;
+}
+
+message LedgerEntriesByTransactionViewState {
+  string transaction_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
+  string shop_id = 5;
+  string merchant_id = 6;
+  google.protobuf.Timestamp incident_timestamp = 7;
+  string amount = 8;
+  string payment_id = 9;
+}
+
+message LedgerEntriesByTransactionResponse {
+  repeated LedgerEntriesByTransactionViewState results = 1;
+}

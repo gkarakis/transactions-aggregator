@@ -4,8 +4,8 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.aggregator.Main;
 import io.aggregator.entity.TransactionMerchantKey;
-import io.aggregator.view.IncidentsByDate;
-import io.aggregator.view.IncidentsByDateModel;
+import io.aggregator.view.LedgerEntriesByDate;
+import io.aggregator.view.LedgerEntriesByDateModel;
 import kalix.javasdk.Kalix;
 import kalix.javasdk.testkit.KalixTestKit;
 import kalix.javasdk.testkit.junit.jupiter.KalixDescriptor;
@@ -39,13 +39,13 @@ public class IncidentViewIntegrationTest {
   /**
    * Use the generated gRPC client to call the service through the Kalix proxy.
    */
-  private final Incident client;
-  private final IncidentsByDate view;
+  private final LedgerEntry client;
+  private final LedgerEntriesByDate view;
 
   public IncidentViewIntegrationTest() {
     testKit.start();
-    client = testKit.getGrpcClient(Incident.class);
-    view = testKit.getGrpcClient(IncidentsByDate.class);
+    client = testKit.getGrpcClient(LedgerEntry.class);
+    view = testKit.getGrpcClient(LedgerEntriesByDate.class);
   }
 
   @Test
@@ -63,44 +63,43 @@ public class IncidentViewIntegrationTest {
             .setAccountFrom("accFrom")
             .setAccountTo("accTo")
             .build();
-    var createCommand = IncidentApi.CreateIncidentCommand.newBuilder()
+    var createCommand = LedgerEntryApi.CreateLedgerEntryCommand.newBuilder()
             .setTransactionId(key.getTransactionId())
             .setServiceCode(key.getServiceCode())
             .setAccountFrom(key.getAccountFrom())
             .setAccountTo(key.getAccountTo())
-            .setIncidentAmount(incidentAmount)
+            .setAmount(incidentAmount)
             .setTimestamp(t)
             .setMerchantId(merchantId)
             .setShopId(shopId)
             .build();
-    var createResponse = client.createIncident(createCommand).toCompletableFuture().get(15,SECONDS);
+    var createResponse = client.createLedgerEntry(createCommand).toCompletableFuture().get(15,SECONDS);
 
-    var getCommand = IncidentApi.GetIncidentRequest.newBuilder()
+    var getCommand = LedgerEntryApi.GetLedgerEntryRequest.newBuilder()
             .setTransactionId(key.getTransactionId())
             .setServiceCode(key.getServiceCode())
             .setAccountFrom(key.getAccountFrom())
             .setAccountTo(key.getAccountTo())
             .build();
-    var get = client.getIncident(getCommand).toCompletableFuture().get(15,SECONDS);
+    var get = client.getLedgerEntry(getCommand).toCompletableFuture().get(15,SECONDS);
 
-    assertEquals(incidentAmount, get.getIncidentAmount());
+    assertEquals(incidentAmount, get.getAmount());
     assertTrue(get.getPaymentId().isEmpty());
 
     Thread.sleep(5000);
 
     Timestamp from = Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli());
     Timestamp to = Timestamps.fromMillis(Instant.now().toEpochMilli());
-    var unPaidIncidentsByMerchantAndDateReq = IncidentsByDateModel.IncidentsByDateRequest.newBuilder()
+    var unPaidIncidentsByMerchantAndDateReq = LedgerEntriesByDateModel.LedgerEntriesByDateRequest.newBuilder()
             .setFromDate(from)
             .setToDate(to)
             .setMerchantId(merchantId)
             .setPaymentId("0")
             .build();
-    var unPaidIncidentsByMerchantAndDateRes = view.getIncidentsByDate(unPaidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    var unPaidIncidentsByMerchantAndDateRes = view.getLedgerEntriesByDate(unPaidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
     assertEquals(1,unPaidIncidentsByMerchantAndDateRes.getResultsCount());
 
-
-    var addPaymentCommand = IncidentApi.AddPaymentCommand.newBuilder()
+    var addPaymentCommand = LedgerEntryApi.AddPaymentCommand.newBuilder()
             .setTransactionId(key.getTransactionId())
             .setServiceCode(key.getServiceCode())
             .setAccountFrom(key.getAccountFrom())
@@ -108,26 +107,25 @@ public class IncidentViewIntegrationTest {
             .setPaymentId(paymentId)
             .setTimestamp(t).build();
     var addPaymentResponse = client.addPayment(addPaymentCommand).toCompletableFuture().get(5,SECONDS);
-    get = client.getIncident(getCommand).toCompletableFuture().get(5,SECONDS);
-    assertEquals(incidentAmount, get.getIncidentAmount());
+    get = client.getLedgerEntry(getCommand).toCompletableFuture().get(5,SECONDS);
+    assertEquals(incidentAmount, get.getAmount());
     assertEquals(paymentId,get.getPaymentId());
 
 
     Thread.sleep(5000);
 
     //check
-    unPaidIncidentsByMerchantAndDateRes = view.getIncidentsByDate(unPaidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    unPaidIncidentsByMerchantAndDateRes = view.getLedgerEntriesByDate(unPaidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
     assertEquals(0,unPaidIncidentsByMerchantAndDateRes.getResultsCount());
 
     var paidIncidentsByMerchantAndDateReq = unPaidIncidentsByMerchantAndDateReq
             .toBuilder()
             .setPaymentId(paymentId)
             .build();
-    var paidIncidentsByMerchantAndDateRes = view.getIncidentsByDate(paidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+    var paidIncidentsByMerchantAndDateRes = view.getLedgerEntriesByDate(paidIncidentsByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
     assertEquals(1,paidIncidentsByMerchantAndDateRes.getResultsCount());
     assertEquals(paymentId, paidIncidentsByMerchantAndDateRes.getResults(0).getPaymentId());
 
   }
-
 
 }

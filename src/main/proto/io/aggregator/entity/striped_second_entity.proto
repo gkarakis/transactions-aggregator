@@ -17,7 +17,7 @@ message StripedSecondLedgerItemsAdded {
   MerchantKey merchant_key = 1;
   int64 epoch_second = 2;
   int32 stripe = 3;
-  repeated LedgerEntry ledger_entries = 4;
+  repeated LedgeringActivity ledgering_activity = 4;
   google.protobuf.Timestamp timestamp = 5;
   string shop_id = 6;
 }
@@ -40,12 +40,12 @@ message StripedSecondState {
   int64 epoch_minute = 4;
   int64 epoch_hour = 5;
   int64 epoch_day = 6;
-  repeated LedgerEntry ledger_entries = 7;
+  repeated LedgeringActivity ledgering_activity = 7;
   google.protobuf.Timestamp last_update_timestamp = 8;
   string shop_id = 9;
 }
 
-message LedgerEntry {
+message LedgeringActivity {
   TransactionKey transaction_key = 1;
   int64 epoch_second = 2;
   int32 stripe = 3;
