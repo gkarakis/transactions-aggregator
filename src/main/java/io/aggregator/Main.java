@@ -49,11 +49,9 @@ public final class Main {
       MinuteToSecondAction::new,
       SecondToMinuteAction::new,
       SecondToStripedSecondAction::new,
-      StripedSecondToIncidentAction::new,
+      StripedSecondToLedgerEntryAction::new,
       StripedSecondToSecondAction::new,
-      TransactionToStripedSecondAction::new,
-      TransactionsNotPaidByDateView::new,
-      TransactionsPaidByPaymentByDateView::new);
+      TransactionToStripedSecondAction::new);
   }
 
   public static void main(String[] args) throws Exception {

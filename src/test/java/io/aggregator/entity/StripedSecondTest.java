@@ -75,10 +75,10 @@ public class StripedSecondTest {
     assertEquals(1, state.getStripe());
     assertEquals(now.toEpochSecond(), state.getEpochSecond());
     assertEquals(1, state.getLedgeringActivityCount());
-    assertEquals("txn-1", state.getLedgeringActivity(0).getTransactionKey().getTransactionId());
-    assertEquals("AF", state.getLedgeringActivity(0).getTransactionKey().getAccountFrom());
-    assertEquals("AT", state.getLedgeringActivity(0).getTransactionKey().getAccountTo());
-    assertEquals("SVC1", state.getLedgeringActivity(0).getTransactionKey().getServiceCode());
+    assertEquals("txn-1", state.getLedgeringActivity(0).getLedgeringActivityKey().getTransactionId());
+    assertEquals("AF", state.getLedgeringActivity(0).getLedgeringActivityKey().getAccountFrom());
+    assertEquals("AT", state.getLedgeringActivity(0).getLedgeringActivityKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgeringActivity(0).getLedgeringActivityKey().getServiceCode());
     assertEquals("1.11", state.getLedgeringActivity(0).getAmount());
 
     service.addLedgerItems(command1);
@@ -88,10 +88,10 @@ public class StripedSecondTest {
     assertEquals(1, state.getStripe());
     assertEquals(now.toEpochSecond(), state.getEpochSecond());
     assertEquals(1, state.getLedgeringActivityCount());
-    assertEquals("txn-1", state.getLedgeringActivity(0).getTransactionKey().getTransactionId());
-    assertEquals("AF", state.getLedgeringActivity(0).getTransactionKey().getAccountFrom());
-    assertEquals("AT", state.getLedgeringActivity(0).getTransactionKey().getAccountTo());
-    assertEquals("SVC1", state.getLedgeringActivity(0).getTransactionKey().getServiceCode());
+    assertEquals("txn-1", state.getLedgeringActivity(0).getLedgeringActivityKey().getTransactionId());
+    assertEquals("AF", state.getLedgeringActivity(0).getLedgeringActivityKey().getAccountFrom());
+    assertEquals("AT", state.getLedgeringActivity(0).getLedgeringActivityKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgeringActivity(0).getLedgeringActivityKey().getServiceCode());
     assertEquals("1.11", state.getLedgeringActivity(0).getAmount());
 
     service.addLedgerItems(command2);
@@ -101,15 +101,15 @@ public class StripedSecondTest {
     assertEquals(1, state.getStripe());
     assertEquals(now.toEpochSecond(), state.getEpochSecond());
     assertEquals(2, state.getLedgeringActivityCount());
-    assertEquals("txn-1", state.getLedgeringActivity(0).getTransactionKey().getTransactionId());
-    assertEquals("AF", state.getLedgeringActivity(0).getTransactionKey().getAccountFrom());
-    assertEquals("AT", state.getLedgeringActivity(0).getTransactionKey().getAccountTo());
-    assertEquals("SVC1", state.getLedgeringActivity(0).getTransactionKey().getServiceCode());
+    assertEquals("txn-1", state.getLedgeringActivity(0).getLedgeringActivityKey().getTransactionId());
+    assertEquals("AF", state.getLedgeringActivity(0).getLedgeringActivityKey().getAccountFrom());
+    assertEquals("AT", state.getLedgeringActivity(0).getLedgeringActivityKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgeringActivity(0).getLedgeringActivityKey().getServiceCode());
     assertEquals("1.11", state.getLedgeringActivity(0).getAmount());
-    assertEquals("txn-1", state.getLedgeringActivity(1).getTransactionKey().getTransactionId());
-    assertEquals("AF2", state.getLedgeringActivity(1).getTransactionKey().getAccountFrom());
-    assertEquals("AT2", state.getLedgeringActivity(1).getTransactionKey().getAccountTo());
-    assertEquals("SVC1", state.getLedgeringActivity(1).getTransactionKey().getServiceCode());
+    assertEquals("txn-1", state.getLedgeringActivity(1).getLedgeringActivityKey().getTransactionId());
+    assertEquals("AF2", state.getLedgeringActivity(1).getLedgeringActivityKey().getAccountFrom());
+    assertEquals("AT2", state.getLedgeringActivity(1).getLedgeringActivityKey().getAccountTo());
+    assertEquals("SVC1", state.getLedgeringActivity(1).getLedgeringActivityKey().getServiceCode());
     assertEquals("1.22", state.getLedgeringActivity(1).getAmount());
   }
 

@@ -7,14 +7,14 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 import "io/aggregator/entity/striped_second_entity.proto";
 
-option java_outer_classname = "StripedSecondToIncidentService";
+option java_outer_classname = "StripedSecondToLedgerEntryService";
 
-service StripedSecondToIncident {
+service StripedSecondToLedgerEntry {
   option (kalix.codegen) = {
     action: {}
   };
 
-  rpc OnStripedSecondLedgerItemsAdded(entity.StripedSecondLedgerItemsAdded) returns (google.protobuf.Empty) {
+  rpc OnStripedSecondLedgeringActivitiesAdded(entity.StripedSecondLedgeringActivitiesAdded) returns (google.protobuf.Empty) {
     option (kalix.method).eventing.in = {
       event_sourced_entity: "striped_second"
     };

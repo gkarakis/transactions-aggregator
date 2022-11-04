@@ -52,7 +52,7 @@ public class StripedSecond extends AbstractStripedSecond {
   }
 
   @Override
-  public StripedSecondEntity.StripedSecondState stripedSecondLedgerItemsAdded(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondLedgerItemsAdded event) {
+  public StripedSecondEntity.StripedSecondState stripedSecondLedgeringActivitiesAdded(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondLedgeringActivitiesAdded event) {
     return handle(state, event);
   }
 
@@ -67,11 +67,11 @@ public class StripedSecond extends AbstractStripedSecond {
 
     boolean newEntry = command.getLedgerItemList().stream()
         .allMatch(ledgerItem -> state.getLedgeringActivityList().stream()
-            .noneMatch(existingLedgerEntry -> existingLedgerEntry.getTransactionKey().getTransactionId().equals(command.getTransactionId()) &&
-                    existingLedgerEntry.getTransactionKey().getServiceCode().equals(ledgerItem.getServiceCode()) &&
-                    existingLedgerEntry.getTransactionKey().getAccountFrom().equals(ledgerItem.getAccountFrom()) &&
-                    existingLedgerEntry.getTransactionKey().getAccountTo().equals(ledgerItem.getAccountTo()) &&
-                    existingLedgerEntry.getTimestamp().equals(command.getTimestamp())));
+            .noneMatch(existingLedgeringActivity -> existingLedgeringActivity.getLedgeringActivityKey().getTransactionId().equals(command.getTransactionId()) &&
+                    existingLedgeringActivity.getLedgeringActivityKey().getServiceCode().equals(ledgerItem.getServiceCode()) &&
+                    existingLedgeringActivity.getLedgeringActivityKey().getAccountFrom().equals(ledgerItem.getAccountFrom()) &&
+                    existingLedgeringActivity.getLedgeringActivityKey().getAccountTo().equals(ledgerItem.getAccountTo()) &&
+                    existingLedgeringActivity.getTimestamp().equals(command.getTimestamp())));
     if (!newEntry) {
       return effects().reply(Empty.getDefaultInstance());
     }
@@ -108,9 +108,9 @@ public class StripedSecond extends AbstractStripedSecond {
         .build();
   }
 
-  static StripedSecondEntity.StripedSecondState handle(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondLedgerItemsAdded event) {
-    log.debug(Thread.currentThread().getName() + " - StripedSecondLedgerItemsAdded: {}", event);
-    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: StripedSecondLedgerItemsAdded");
+  static StripedSecondEntity.StripedSecondState handle(StripedSecondEntity.StripedSecondState state, StripedSecondEntity.StripedSecondLedgeringActivitiesAdded event) {
+    log.debug(Thread.currentThread().getName() + " - StripedSecondLedgeringActivitiesAdded: {}", event);
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: StripedSecondLedgeringActivitiesAdded");
 
     var newState = state.toBuilder();
     event.getLedgeringActivityList()
@@ -143,7 +143,7 @@ public class StripedSecond extends AbstractStripedSecond {
   }
 
   static List<?> eventsFor(StripedSecondEntity.StripedSecondState state, StripedSecondApi.AddLedgerItemsCommand command) {
-    var stripedSecondLedgerItemsAdded = StripedSecondEntity.StripedSecondLedgerItemsAdded
+    var stripedSecondLedgerItemsAdded = StripedSecondEntity.StripedSecondLedgeringActivitiesAdded
         .newBuilder()
         .setMerchantKey(
             TransactionMerchantKey.MerchantKey
@@ -157,7 +157,7 @@ public class StripedSecond extends AbstractStripedSecond {
         .addAllLedgeringActivity(
             command.getLedgerItemList().stream()
                 .map(ledgerItem -> StripedSecondEntity.LedgeringActivity.newBuilder()
-                    .setTransactionKey(TransactionMerchantKey.TransactionKey.newBuilder()
+                    .setLedgeringActivityKey(StripedSecondEntity.LedgeringActivityKey.newBuilder()
                         .setTransactionId(command.getTransactionId())
                         .setServiceCode(ledgerItem.getServiceCode())
                         .setAccountFrom(ledgerItem.getAccountFrom())
@@ -208,11 +208,11 @@ public class StripedSecond extends AbstractStripedSecond {
       Map<MoneyMovementKey, TransactionMerchantKey.MoneyMovement> summarisedMoneyMovementsMap = new HashMap<>();
       ledgerEntries.stream()
           .map(ledgerEntry -> TransactionMerchantKey.MoneyMovement.newBuilder()
-              .setAccountFrom(ledgerEntry.getTransactionKey().getAccountFrom())
-              .setAccountTo(ledgerEntry.getTransactionKey().getAccountTo())
+              .setAccountFrom(ledgerEntry.getLedgeringActivityKey().getAccountFrom())
+              .setAccountTo(ledgerEntry.getLedgeringActivityKey().getAccountTo())
               .setAmount(ledgerEntry.getAmount())
-              .setTransactionId(ledgerEntry.getTransactionKey().getTransactionId())
-                  .setServiceCode(ledgerEntry.getTransactionKey().getServiceCode())
+              .setTransactionId(ledgerEntry.getLedgeringActivityKey().getTransactionId())
+                  .setServiceCode(ledgerEntry.getLedgeringActivityKey().getServiceCode())
               .build())
           .forEach(transfer -> {
             MoneyMovementKey key = MoneyMovementKey.builder()

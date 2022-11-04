@@ -7,26 +7,12 @@ package io.aggregator.entity;
 
 option java_outer_classname = "TransactionEntity";
 
-//Deprecated
-message TransactionCreated {
-  string transaction_id = 1;
-  string merchant_id = 2;
-  string shop_id = 3;
-  string transaction_amount = 4;
-  google.protobuf.Timestamp transaction_timestamp = 5;
-}
-
 message IncidentAdded {
   string transaction_id = 1;
   string shop_id = 2;
   string merchant_id = 3;
   google.protobuf.Timestamp incident_timestamp = 4;
   TransactionIncident transaction_incident = 5;
-}
-
-message PaymentAdded {
-  TransactionKey transaction_key = 1;
-  string payment_id = 2;
 }
 
 message TransactionState {

@@ -3,7 +3,7 @@ package io.aggregator.api;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.aggregator.Main;
-import io.aggregator.entity.TransactionMerchantKey;
+import io.aggregator.entity.LedgerEntryEntity;
 import io.aggregator.view.LedgerEntriesByDate;
 import io.aggregator.view.LedgerEntriesByDateModel;
 import kalix.javasdk.Kalix;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // Example of an integration test calling our service via the Kalix proxy
 // Run all test classes ending with "IntegrationTest" using `mvn verify -Pit`
 @KalixTest
-public class IncidentViewIntegrationTest {
+public class LedgerEntryViewIntegrationTest {
 
   /**
    * The test kit starts both the service container and the Kalix proxy.
@@ -42,7 +42,7 @@ public class IncidentViewIntegrationTest {
   private final LedgerEntry client;
   private final LedgerEntriesByDate view;
 
-  public IncidentViewIntegrationTest() {
+  public LedgerEntryViewIntegrationTest() {
     testKit.start();
     client = testKit.getGrpcClient(LedgerEntry.class);
     view = testKit.getGrpcClient(LedgerEntriesByDate.class);
@@ -57,7 +57,7 @@ public class IncidentViewIntegrationTest {
 
     Timestamp t = Timestamps.fromDate(new Date());
 
-    TransactionMerchantKey.TransactionKey key = TransactionMerchantKey.TransactionKey.newBuilder()
+    LedgerEntryEntity.LedgerEntryKey key = LedgerEntryEntity.LedgerEntryKey.newBuilder()
             .setTransactionId("transId1")
             .setServiceCode("srv1")
             .setAccountFrom("accFrom")

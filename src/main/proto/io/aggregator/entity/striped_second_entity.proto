@@ -13,7 +13,7 @@ message StripedSecondActivated {
   int32 stripe = 3;
 }
 
-message StripedSecondLedgerItemsAdded {
+message StripedSecondLedgeringActivitiesAdded {
   MerchantKey merchant_key = 1;
   int64 epoch_second = 2;
   int32 stripe = 3;
@@ -46,11 +46,18 @@ message StripedSecondState {
 }
 
 message LedgeringActivity {
-  TransactionKey transaction_key = 1;
+  LedgeringActivityKey ledgering_activity_key = 1;
   int64 epoch_second = 2;
   int32 stripe = 3;
   string amount = 4;
   google.protobuf.Timestamp timestamp = 5;
   google.protobuf.Timestamp aggregate_request_timestamp = 6;
   string payment_id = 7;
+}
+
+message LedgeringActivityKey {
+  string transaction_id = 1;
+  string service_code = 2;
+  string account_from = 3;
+  string account_to = 4;
 }

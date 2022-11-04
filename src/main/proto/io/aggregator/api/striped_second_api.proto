@@ -17,7 +17,7 @@ service StripedSecond {
       state: "io.aggregator.entity.StripedSecondState"
       events: [
         "io.aggregator.entity.StripedSecondActivated",
-        "io.aggregator.entity.StripedSecondLedgerItemsAdded",
+        "io.aggregator.entity.StripedSecondLedgeringActivitiesAdded",
         "io.aggregator.entity.StripedSecondAggregated"
       ]
     }

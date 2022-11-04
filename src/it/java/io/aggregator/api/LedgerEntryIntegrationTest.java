@@ -3,7 +3,7 @@ package io.aggregator.api;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.aggregator.Main;
-import io.aggregator.entity.TransactionMerchantKey;
+import io.aggregator.entity.LedgerEntryEntity;
 import kalix.javasdk.Kalix;
 import kalix.javasdk.testkit.KalixTestKit;
 import kalix.javasdk.testkit.junit.jupiter.KalixDescriptor;
@@ -65,7 +65,7 @@ public class LedgerEntryIntegrationTest {
     //         .toCompletableFuture().get(5, SECONDS);
   }
 
-  @org.junit.jupiter.api.Test
+  @Test
   public void happyPath() throws Exception {
     String incidentAmount = "100";
     String paymentId = "1234";
@@ -74,7 +74,7 @@ public class LedgerEntryIntegrationTest {
 
     Timestamp t = Timestamps.fromDate(new Date());
 
-    TransactionMerchantKey.TransactionKey key = TransactionMerchantKey.TransactionKey.newBuilder()
+    LedgerEntryEntity.LedgerEntryKey key = LedgerEntryEntity.LedgerEntryKey.newBuilder()
         .setTransactionId("transId1")
         .setServiceCode("srv1")
         .setAccountFrom("accFrom")

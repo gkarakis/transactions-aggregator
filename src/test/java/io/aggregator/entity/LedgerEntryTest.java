@@ -73,7 +73,7 @@ public class LedgerEntryTest {
     Timestamp t = Timestamps.fromDate(new Date());
 
     LedgerEntryTestKit service = LedgerEntryTestKit.of(LedgerEntry::new);
-    TransactionMerchantKey.TransactionKey key = TransactionMerchantKey.TransactionKey.newBuilder()
+    LedgerEntryEntity.LedgerEntryKey key = LedgerEntryEntity.LedgerEntryKey.newBuilder()
         .setTransactionId("transId1")
         .setServiceCode("srv1")
         .setAccountFrom("accFrom")
