@@ -17,17 +17,17 @@ public class MerchantPaymentsByMerchantByDateView extends AbstractMerchantPaymen
   }
 
   @Override
-  public MerchantPaymentsModel.MerchantPayment emptyState() {
-    return MerchantPaymentsModel.MerchantPayment.getDefaultInstance();
+  public MerchantPaymentModel.MerchantPayment emptyState() {
+    return MerchantPaymentModel.MerchantPayment.getDefaultInstance();
   }
 
   @Override
-  public View.UpdateEffect<MerchantPaymentsModel.MerchantPayment> onPaymentAggregated(MerchantPaymentsModel.MerchantPayment state, PaymentEntity.PaymentAggregated event) {
+  public View.UpdateEffect<MerchantPaymentModel.MerchantPayment> onPaymentAggregated(MerchantPaymentModel.MerchantPayment state, PaymentEntity.PaymentAggregated event) {
     return effects().updateState(MerchantPaymentsEventHandler.handle(state, event));
   }
 
   @Override
-  public View.UpdateEffect<MerchantPaymentsModel.MerchantPayment> ignoreOtherEvents(MerchantPaymentsModel.MerchantPayment state, Any any) {
+  public View.UpdateEffect<MerchantPaymentModel.MerchantPayment> ignoreOtherEvents(MerchantPaymentModel.MerchantPayment state, Any any) {
     return effects().ignore();
   }
 }

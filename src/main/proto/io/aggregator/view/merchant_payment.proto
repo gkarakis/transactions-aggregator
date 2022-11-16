@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package io.aggregator.view;
+
+import "google/protobuf/timestamp.proto";
+import "io/aggregator/entity/transaction_merchant_key.proto";
+
+option java_outer_classname = "MerchantPaymentModel";
+
+message MerchantPayment {
+  string merchant_id = 1;
+  string payment_id = 2;
+  repeated entity.MoneyMovement money_movements = 3;
+  google.protobuf.Timestamp payment_timestamp = 4;
+}

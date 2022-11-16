@@ -5,10 +5,7 @@ import com.google.protobuf.util.Timestamps;
 import io.aggregator.Main;
 import io.aggregator.TimeTo;
 import io.aggregator.entity.TransactionMerchantKey;
-import io.aggregator.view.LedgerEntriesByDate;
-import io.aggregator.view.LedgerEntriesByDateModel;
-import io.aggregator.view.LedgerEntriesByTransaction;
-import io.aggregator.view.LedgerEntriesByTransactionModel;
+import io.aggregator.view.*;
 import kalix.javasdk.Kalix;
 import kalix.javasdk.testkit.KalixTestKit;
 import kalix.javasdk.testkit.junit.jupiter.KalixDescriptor;
@@ -49,6 +46,7 @@ public class SystemIntegrationTest {
   private final Payment paymentClient;
   private final LedgerEntriesByDate ledgerEntriesByDateView;
   private final LedgerEntriesByTransaction ledgerEntriesByTransactionView;
+  private final MerchantPaymentsByMerchantByDate merchantPaymentsByMerchantByDateView;
 
   public SystemIntegrationTest() {
     testKit.start();
@@ -57,6 +55,7 @@ public class SystemIntegrationTest {
     paymentClient = testKit.getGrpcClient(Payment.class);
     ledgerEntriesByDateView = testKit.getGrpcClient(LedgerEntriesByDate.class);
     ledgerEntriesByTransactionView = testKit.getGrpcClient(LedgerEntriesByTransaction.class);
+    merchantPaymentsByMerchantByDateView = testKit.getGrpcClient(MerchantPaymentsByMerchantByDate.class);
   }
 
   @Test
@@ -218,6 +217,160 @@ public class SystemIntegrationTest {
       assertTrue(optionalSvc4.isPresent());
       assertEquals(BigDecimal.valueOf(amountByMerchant[i]).add(BigDecimal.valueOf(0.444).multiply(new BigDecimal(numberOfEventsByMerchant[i]))).toString(), optionalSvc4.get().getAmount());
     }
+  }
+
+  @Test
+  public void endToEndTransactionsWithViews() throws Exception {
+    System.out.println("TEST START TIME: " + Instant.now().toString());
+
+    transactionClient.paymentPriced(TransactionApi.PaymentPricedCommand
+        .newBuilder()
+        .setTransactionId("txn-tesco-1")
+        .setShopId("tesco-chelsea")
+        .setEventType("approved")
+        .setTimestamp(TimeTo.now())
+        .addPricedItem(TransactionApi.PricedItem.newBuilder()
+            .setPricedItemAmount("1.01")
+            .setServiceCode("SVC1")
+            .build())
+        .build()).toCompletableFuture().get(10, SECONDS);
+    transactionClient.paymentPriced(TransactionApi.PaymentPricedCommand
+        .newBuilder()
+        .setTransactionId("txn-amazon-1")
+        .setShopId("amazon-uk")
+        .setEventType("approved")
+        .setTimestamp(TimeTo.now())
+        .addPricedItem(TransactionApi.PricedItem.newBuilder()
+            .setPricedItemAmount("2.01")
+            .setServiceCode("SVC2")
+            .build())
+        .build()).toCompletableFuture().get(10, SECONDS);
+    Thread.sleep(3000);
+
+    merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand
+        .newBuilder()
+        .setMerchantId("tesco")
+        .build()).toCompletableFuture().get(10, SECONDS);
+    merchantClient.merchantPaymentRequest(MerchantApi.MerchantPaymentRequestCommand
+        .newBuilder()
+        .setMerchantId("amazon")
+        .build()).toCompletableFuture().get(10, SECONDS);
+    Thread.sleep(3000);
+
+    MerchantPaymentsByMerchantByDateModel.MerchantPaymentsByMerchantByDateResponse tescoPayments = merchantPaymentsByMerchantByDateView.getMerchantPaymentsByMerchantByDate(MerchantPaymentsByMerchantByDateModel.MerchantPaymentsByMerchantByDateRequest.newBuilder()
+        .setMerchantId("tesco")
+        .setFromDate(Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli()))
+        .setToDate(Timestamps.fromMillis(Instant.now().toEpochMilli()))
+        .build()).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1, tescoPayments.getMerchantPaymentsCount());
+    transactionClient.paymentPriced(TransactionApi.PaymentPricedCommand
+        .newBuilder()
+        .setTransactionId("txn-tesco-2")
+        .setShopId("tesco-chelsea")
+        .setEventType("approved")
+        .setTimestamp(TimeTo.now())
+        .addPricedItem(TransactionApi.PricedItem.newBuilder()
+            .setPricedItemAmount("1.02")
+            .setServiceCode("SVC1")
+            .build())
+        .build()).toCompletableFuture().get(10, SECONDS);
+    transactionClient.paymentPriced(TransactionApi.PaymentPricedCommand
+        .newBuilder()
+        .setTransactionId("txn-amazon-1")
+        .setShopId("amazon-uk")
+        .setEventType("cleared")
+        .setTimestamp(TimeTo.now())
+        .addPricedItem(TransactionApi.PricedItem.newBuilder()
+            .setPricedItemAmount("2.11")
+            .setServiceCode("SVC2")
+            .build())
+        .build()).toCompletableFuture().get(10, SECONDS);
+    Thread.sleep(3000);
+    merchantClient.merchantPaymentRequest(MerchantApi.MerchantPaymentRequestCommand
+        .newBuilder()
+        .setMerchantId("tesco")
+        .build()).toCompletableFuture().get(10, SECONDS);
+    merchantClient.merchantPaymentRequest(MerchantApi.MerchantPaymentRequestCommand
+        .newBuilder()
+        .setMerchantId("amazon")
+        .build()).toCompletableFuture().get(10, SECONDS);
+    Thread.sleep(3000);
+
+    MerchantPaymentsByMerchantByDateModel.MerchantPaymentsByMerchantByDateResponse paymentsByMerchantByDateResponse = merchantPaymentsByMerchantByDateView.getMerchantPaymentsByMerchantByDate(MerchantPaymentsByMerchantByDateModel.MerchantPaymentsByMerchantByDateRequest.newBuilder()
+        .setMerchantId("amazon")
+        .setFromDate(Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli()))
+        .setToDate(Timestamps.fromMillis(Instant.now().toEpochMilli()))
+        .build()).toCompletableFuture().get(5,SECONDS);
+    assertEquals(2, paymentsByMerchantByDateResponse.getMerchantPaymentsCount());
+
+
+
+
+
+
+
+
+
+
+
+
+//    System.out.println("PAYMENT_PRICED END TIME: " + Instant.now().toString());
+//
+//    Timestamp from = Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli());
+//    Timestamp to = Timestamps.fromMillis(Instant.now().toEpochMilli());
+//    var unPaidLedgerEntriesByMerchantAndDateReq = LedgerEntriesByDateModel.LedgerEntriesByDateRequest.newBuilder()
+//        .setFromDate(from)
+//        .setToDate(to)
+//        .setMerchantId("tesco")
+//        .setPaymentId("0")
+//        .build();
+//    var unPaidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(unPaidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+//    assertEquals(1,unPaidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+//    var ledgerEntriesByTransactionRequest = LedgerEntriesByTransactionModel.LedgerEntriesByTransactionRequest.newBuilder()
+//        .setTransactionId("txn-1")
+//        .build();
+//    var ledgerEntriesByTransactionRes = ledgerEntriesByTransactionView.getLedgerEntriesByTransaction(ledgerEntriesByTransactionRequest).toCompletableFuture().get(5,SECONDS);
+//    assertEquals(1, ledgerEntriesByTransactionRes.getResultsCount());
+//    assertEquals("0", ledgerEntriesByTransactionRes.getResults(0).getPaymentId());
+//
+//    merchantClient.merchantAggregationRequest(MerchantApi.MerchantAggregationRequestCommand
+//        .newBuilder()
+//        .setMerchantId("tesco")
+//        .build()).toCompletableFuture().get(10, SECONDS);
+//    Thread.sleep(10000);
+//    System.out.println("MERCHANT_AGGREGATION END TIME: " + Instant.now().toString());
+//
+//    PaymentApi.PaymentStatusResponse paymentStatusResponse = paymentClient.paymentStatus(PaymentApi.PaymentStatusCommand
+//        .newBuilder()
+//        .setMerchantId("tesco")
+//        .setPaymentId("payment-1")
+//        .build()).toCompletableFuture().get(10, SECONDS);
+//    Thread.sleep(10000);
+//    System.out.println("PAYMENT_STATUS END TIME: " + Instant.now().toString());
+//
+//    assertNotNull(paymentStatusResponse);
+//    assertEquals("tesco", paymentStatusResponse.getMerchantId());
+//    assertEquals("payment-1", paymentStatusResponse.getPaymentId());
+//    assertEquals(1, paymentStatusResponse.getMoneyMovementsCount());
+//    TransactionMerchantKey.MoneyMovement moneyMovement = paymentStatusResponse.getMoneyMovements(0);
+//    assertEquals("JPMC", moneyMovement.getAccountFrom());
+//    assertEquals("MERCHANT-TESCO", moneyMovement.getAccountTo());
+//    assertEquals("1.01", moneyMovement.getAmount());
+//
+//    //check
+//    unPaidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(unPaidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+//    assertEquals(0,unPaidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+//    ledgerEntriesByTransactionRes = ledgerEntriesByTransactionView.getLedgerEntriesByTransaction(ledgerEntriesByTransactionRequest).toCompletableFuture().get(5,SECONDS);
+//    assertEquals(1, ledgerEntriesByTransactionRes.getResultsCount());
+//    assertEquals("payment-1", ledgerEntriesByTransactionRes.getResults(0).getPaymentId());
+//
+//    var paidLedgerEntriesByMerchantAndDateReq = unPaidLedgerEntriesByMerchantAndDateReq
+//        .toBuilder()
+//        .setPaymentId("payment-1")
+//        .build();
+//    var paidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(paidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
+//    assertEquals(1,paidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+//    assertEquals("payment-1", paidLedgerEntriesByMerchantAndDateRes.getResults(0).getPaymentId());
   }
 
   private Optional<TransactionMerchantKey.MoneyMovement> findMoneyMovement(PaymentApi.PaymentStatusResponse paymentStatusResponse, String from, String to) {

@@ -43,8 +43,6 @@ public final class Main {
       MerchantPaymentsByMerchantByDateView::new,
       MerchantToDayAction::new,
       MerchantToPaymentAction::new,
-      MerchantsByMerchantIdView::new,
-      MerchantsNotPaidView::new,
       MinuteToHourAction::new,
       MinuteToSecondAction::new,
       SecondToMinuteAction::new,
