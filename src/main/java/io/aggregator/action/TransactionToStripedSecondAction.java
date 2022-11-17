@@ -40,6 +40,7 @@ public class TransactionToStripedSecondAction extends AbstractTransactionToStrip
             .setTimestamp(timestamp)
             .setStripe(stripe)
             .setShopId(event.getShopId())
+            .setEventType(event.getTransactionIncident().getEventType())
             .addAllLedgerItem(RuleService.applyRules(event.getMerchantId(), event.getTransactionIncident().getTransactionIncidentServiceList()))
             .build()));
   }

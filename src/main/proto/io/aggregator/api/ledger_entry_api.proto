@@ -53,6 +53,7 @@ message CreateLedgerEntryCommand {
   string amount = 6;
   string shop_id = 7;
   string merchant_id = 8;
+  string event_type = 9;
 }
 
 message AddPaymentCommand {

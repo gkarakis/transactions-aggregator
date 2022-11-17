@@ -71,6 +71,7 @@ message LedgerEntriesByTransactionViewState {
   google.protobuf.Timestamp incident_timestamp = 7;
   string amount = 8;
   string payment_id = 9;
+  string event_type = 10;
 }
 
 message LedgerEntriesByTransactionResponse {

@@ -30,9 +30,9 @@ public class LedgerEntriesByDateView extends AbstractLedgerEntriesByDateView {
         .setAccountTo(ledgerEntryCreated.getLedgerEntryKey().getAccountTo())
         .setIncidentTimestamp(ledgerEntryCreated.getIncidentTimestamp())
         .setAmount(ledgerEntryCreated.getAmount())
-        .setPaymentId("0")
         .setMerchantId(ledgerEntryCreated.getMerchantId())
         .setShopId(ledgerEntryCreated.getShopId())
+        .setEventType(ledgerEntryCreated.getEventType())
         .build();
     return effects().updateState(newState);
   }

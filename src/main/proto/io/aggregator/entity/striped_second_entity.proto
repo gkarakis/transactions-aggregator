@@ -20,6 +20,7 @@ message StripedSecondLedgeringActivitiesAdded {
   repeated LedgeringActivity ledgering_activity = 4;
   google.protobuf.Timestamp timestamp = 5;
   string shop_id = 6;
+  string event_type = 7;
 }
 
 message StripedSecondAggregated {

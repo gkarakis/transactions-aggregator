@@ -261,7 +261,7 @@ public class SystemIntegrationTest {
         .build()).toCompletableFuture().get(10, SECONDS);
     Thread.sleep(3000);
 
-    ActiveMerchantPaymentsModel.ActiveMerchantPaymentsResponse activePayments = activeMerchantPaymentsView.getActiveMerchantPayments(ActiveMerchantPaymentsModel.ActiveMerchantPaymentsRequest.newBuilder()
+    ActiveMerchantPaymentsModel.MerchantPaymentsResponse activePayments = activeMerchantPaymentsView.getActiveMerchantPayments(ActiveMerchantPaymentsModel.ActiveMerchantPaymentsRequest.newBuilder()
         .setStartFrom(0)
         .setCount(50)
         .build()).toCompletableFuture().get(5,SECONDS);

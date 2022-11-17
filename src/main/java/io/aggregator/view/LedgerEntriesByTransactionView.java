@@ -32,6 +32,7 @@ public class LedgerEntriesByTransactionView extends AbstractLedgerEntriesByTrans
         .setAmount(ledgerEntryCreated.getAmount())
         .setMerchantId(ledgerEntryCreated.getMerchantId())
         .setShopId(ledgerEntryCreated.getShopId())
+        .setEventType(ledgerEntryCreated.getEventType())
         .build();
     return effects().updateState(newState);
   }

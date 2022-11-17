@@ -42,6 +42,7 @@ public class LedgerEntry extends AbstractLedgerEntry {
         .setShopId(createLedgerEntryCommand.getShopId())
         .setIncidentTimestamp(createLedgerEntryCommand.getTimestamp())
         .setAmount(createLedgerEntryCommand.getAmount())
+        .setEventType(createLedgerEntryCommand.getEventType())
         .build();
 
     return effects().emitEvent(event).thenReply(newState -> Empty.getDefaultInstance());

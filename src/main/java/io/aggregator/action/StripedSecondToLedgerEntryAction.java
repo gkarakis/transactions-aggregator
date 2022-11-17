@@ -41,6 +41,7 @@ public class StripedSecondToLedgerEntryAction extends AbstractStripedSecondToLed
                     .setAccountTo(ledgeringActivity.getLedgeringActivityKey().getAccountTo())
                     .setAmount(ledgeringActivity.getAmount())
                     .setTimestamp(event.getTimestamp())
+                    .setEventType(event.getEventType())
                     .build()
             ).execute().toCompletableFuture()
         ).collect(Collectors.toList());

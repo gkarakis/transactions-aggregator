@@ -154,6 +154,7 @@ public class StripedSecond extends AbstractStripedSecond {
         .setEpochSecond(command.getEpochSecond())
         .setStripe(command.getStripe())
         .setTimestamp(command.getTimestamp())
+        .setEventType(command.getEventType())
         .addAllLedgeringActivity(
             command.getLedgerItemList().stream()
                 .map(ledgerItem -> StripedSecondEntity.LedgeringActivity.newBuilder()
