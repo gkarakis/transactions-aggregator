@@ -30,7 +30,6 @@ public class LedgerEntriesByTransactionView extends AbstractLedgerEntriesByTrans
         .setAccountTo(ledgerEntryCreated.getLedgerEntryKey().getAccountTo())
         .setIncidentTimestamp(ledgerEntryCreated.getIncidentTimestamp())
         .setAmount(ledgerEntryCreated.getAmount())
-        .setPaymentId("0")
         .setMerchantId(ledgerEntryCreated.getMerchantId())
         .setShopId(ledgerEntryCreated.getShopId())
         .build();

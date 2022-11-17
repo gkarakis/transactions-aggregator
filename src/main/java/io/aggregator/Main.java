@@ -31,6 +31,7 @@ public final class Main {
       Second::new,
       StripedSecond::new,
       Transaction::new,
+      ActiveMerchantPaymentsView::new,
       DayToHourAction::new,
       DayToMerchantAction::new,
       DayToPaymentAction::new,

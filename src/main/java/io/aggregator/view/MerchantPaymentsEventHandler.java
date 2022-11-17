@@ -11,6 +11,19 @@ import java.util.stream.Stream;
 
 class MerchantPaymentsEventHandler {
 
+  static MerchantPayment handle(MerchantPayment state, PaymentEntity.ActiveDayAggregated event) {
+    Collection<TransactionMerchantKey.MoneyMovement> moneyMovements = RuleService.mergeMoneyMovements(Stream.concat(
+        state.getMoneyMovementsList().stream(),
+        event.getMoneyMovementsList().stream())
+        .collect(Collectors.toList()));
+    return state.toBuilder()
+        .setMerchantId(event.getMerchantKey().getMerchantId())
+        .setPaymentId(event.getPaymentId())
+        .clearMoneyMovements()
+        .addAllMoneyMovements(moneyMovements)
+        .build();
+  }
+
   static MerchantPayment handle(MerchantPayment state, PaymentEntity.PaymentAggregated event) {
     Collection<TransactionMerchantKey.MoneyMovement> moneyMovements = RuleService.mergeMoneyMovements(Stream.concat(
         state.getMoneyMovementsList().stream(),

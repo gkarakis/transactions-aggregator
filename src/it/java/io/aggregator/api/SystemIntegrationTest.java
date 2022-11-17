@@ -47,6 +47,8 @@ public class SystemIntegrationTest {
   private final LedgerEntriesByDate ledgerEntriesByDateView;
   private final LedgerEntriesByTransaction ledgerEntriesByTransactionView;
   private final MerchantPaymentsByMerchantByDate merchantPaymentsByMerchantByDateView;
+  private final MerchantPaymentsByDate merchantPaymentsByDateView;
+  private final ActiveMerchantPayments activeMerchantPaymentsView;
 
   public SystemIntegrationTest() {
     testKit.start();
@@ -56,6 +58,8 @@ public class SystemIntegrationTest {
     ledgerEntriesByDateView = testKit.getGrpcClient(LedgerEntriesByDate.class);
     ledgerEntriesByTransactionView = testKit.getGrpcClient(LedgerEntriesByTransaction.class);
     merchantPaymentsByMerchantByDateView = testKit.getGrpcClient(MerchantPaymentsByMerchantByDate.class);
+    merchantPaymentsByDateView = testKit.getGrpcClient(MerchantPaymentsByDate.class);
+    activeMerchantPaymentsView = testKit.getGrpcClient(ActiveMerchantPayments.class);
   }
 
   @Test
@@ -257,6 +261,17 @@ public class SystemIntegrationTest {
         .build()).toCompletableFuture().get(10, SECONDS);
     Thread.sleep(3000);
 
+    ActiveMerchantPaymentsModel.ActiveMerchantPaymentsResponse activePayments = activeMerchantPaymentsView.getActiveMerchantPayments(ActiveMerchantPaymentsModel.ActiveMerchantPaymentsRequest.newBuilder()
+        .setStartFrom(0)
+        .setCount(50)
+        .build()).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1, activePayments.getMerchantPaymentsCount());
+    MerchantPaymentsByDateModel.MerchantPaymentsByDateResponse allPayments = merchantPaymentsByDateView.getMerchantPaymentsByDate(MerchantPaymentsByDateModel.MerchantPaymentsByDateRequest.newBuilder()
+        .setFromDate(Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli()))
+        .setToDate(Timestamps.fromMillis(Instant.now().toEpochMilli()))
+        .build()).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1, allPayments.getMerchantPaymentsCount());
+    assertEquals("amazon", allPayments.getMerchantPayments(0).getMerchantId());
     MerchantPaymentsByMerchantByDateModel.MerchantPaymentsByMerchantByDateResponse tescoPayments = merchantPaymentsByMerchantByDateView.getMerchantPaymentsByMerchantByDate(MerchantPaymentsByMerchantByDateModel.MerchantPaymentsByMerchantByDateRequest.newBuilder()
         .setMerchantId("tesco")
         .setFromDate(Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli()))
