@@ -25,7 +25,7 @@ service MerchantPaymentsByMerchantByDate {
              "   AND merchant_id = :merchant_id"
     };
     option (google.api.http) = {
-      get: "/merchant-payments-by-merchant-by-date"
+      post: "/merchant-payments-by-merchant-by-date"
     };
   }
 

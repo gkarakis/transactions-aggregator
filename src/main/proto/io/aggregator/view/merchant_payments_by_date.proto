@@ -26,7 +26,7 @@ service MerchantPaymentsByDate {
              "   AND payment_timestamp.seconds < :`to_date.seconds`"
     };
     option (google.api.http) = {
-      get: "/merchant-payments-by-date"
+      post: "/merchant-payments-by-date"
     };
   }
 

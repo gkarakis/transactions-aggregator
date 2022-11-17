@@ -67,4 +67,41 @@ public class TransactionTest {
     assertEquals("SVC1", state.getTransactionIncident(0).getTransactionIncidentService(0).getServiceCode());
     assertEquals("123.45", state.getTransactionIncident(0).getTransactionIncidentService(0).getServiceAmount());
   }
+
+  @Test
+  public void twoPaymentPricedCommandsTest() {
+    TransactionTestKit testKit = TransactionTestKit.of(Transaction::new);
+
+    var now = TimeTo.now();
+    var response = testKit.paymentPriced(
+        TransactionApi.PaymentPricedCommand
+            .newBuilder()
+            .setTransactionId("transaction-1")
+            .setShopId("shop-1")
+            .setEventType("event-type-1")
+                .addPricedItem(TransactionApi.PricedItem.newBuilder()
+                        .setServiceCode("SVC1")
+                        .setPricedItemAmount("123.45")
+                        .build())
+            .setTimestamp(now)
+            .build());
+
+    var incidentAdded = response.getNextEventOfType(TransactionEntity.IncidentAdded.class);
+    assertEquals("transaction-1", incidentAdded.getTransactionId());
+    assertEquals("shop-1", incidentAdded.getShopId());
+    assertEquals(now, incidentAdded.getIncidentTimestamp());
+    assertEquals("event-type-1", incidentAdded.getTransactionIncident().getEventType());
+    assertEquals(1, incidentAdded.getTransactionIncident().getTransactionIncidentServiceCount());
+    assertEquals("SVC1", incidentAdded.getTransactionIncident().getTransactionIncidentService(0).getServiceCode());
+    assertEquals("123.45", incidentAdded.getTransactionIncident().getTransactionIncidentService(0).getServiceAmount());
+
+    var state = testKit.getState();
+    assertEquals("transaction-1", state.getTransactionId());
+    assertEquals("shop", state.getMerchantId());
+    assertEquals("shop-1", state.getShopId());
+    assertEquals(1, state.getTransactionIncidentCount());
+    assertEquals(1, state.getTransactionIncident(0).getTransactionIncidentServiceCount());
+    assertEquals("SVC1", state.getTransactionIncident(0).getTransactionIncidentService(0).getServiceCode());
+    assertEquals("123.45", state.getTransactionIncident(0).getTransactionIncidentService(0).getServiceAmount());
+  }
 }

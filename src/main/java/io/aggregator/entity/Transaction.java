@@ -86,6 +86,8 @@ public class Transaction extends AbstractTransaction {
         .setTransactionId(event.getTransactionId())
         .setMerchantId(event.getMerchantId())
         .setShopId(event.getShopId())
+        .setTransactionAmount(event.getTransactionAmount())
+        .setTransactionTimestamp(event.getTransactionTimestamp())
         .addTransactionIncident(event.getTransactionIncident())
         .build();
   }
@@ -97,6 +99,8 @@ public class Transaction extends AbstractTransaction {
             .setTransactionId(command.getTransactionId())
             .setShopId(command.getShopId())
             .setMerchantId(merchant)
+            .setTransactionAmount(command.getAmount())
+            .setTransactionTimestamp(command.getTransactionTimestamp())
             .setIncidentTimestamp(command.getTimestamp())
             .setTransactionIncident(toTransactionIncident(state, command))
             .build();

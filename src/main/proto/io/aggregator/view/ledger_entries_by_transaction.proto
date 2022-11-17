@@ -22,7 +22,7 @@ service LedgerEntriesByTransaction {
              " WHERE transaction_id = :transaction_id"
     };
     option (google.api.http) = {
-      get: "/ledger-entries-by-transaction"
+      post: "/ledger-entries-by-transaction"
     };
   }
 

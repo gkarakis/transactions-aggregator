@@ -166,17 +166,16 @@ public class Merchant extends AbstractMerchant {
         .setPaymentId(paymentIdNext(state))
         .build();
 
-//    var merchantAggregationRequested = MerchantEntity.MerchantAggregationRequested
-//        .newBuilder()
-//        .setMerchantKey(merchantKey)
-//        .setPaymentId(paymentIdNext(state))
-//        .setAggregateRequestTimestamp(TimeTo.now())
-//        .addAllActiveDays(state.getActiveDaysList())
-//        .addActiveDays(command.getEpochDay())
-//        .build();
+    var merchantAggregationRequested = MerchantEntity.MerchantAggregationRequested
+        .newBuilder()
+        .setMerchantKey(merchantKey)
+        .setPaymentId(paymentIdNext(state))
+        .setAggregateRequestTimestamp(TimeTo.now())
+        .addAllActiveDays(state.getActiveDaysList())
+        .addActiveDays(command.getEpochDay())
+        .build();
 
-//    return List.of(merchantDayActivated, merchantAggregationRequested);
-    return List.of(merchantDayActivated);
+    return List.of(merchantDayActivated, merchantAggregationRequested);
   }
 
   static Optional<MerchantEntity.MerchantAggregationRequested> eventFor(MerchantEntity.MerchantState state, MerchantApi.MerchantAggregationRequestCommand command) {
