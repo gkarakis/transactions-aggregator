@@ -49,6 +49,7 @@ public class SystemIntegrationTest {
   private final MerchantPaymentsByMerchantByDate merchantPaymentsByMerchantByDateView;
   private final MerchantPaymentsByDate merchantPaymentsByDateView;
   private final ActiveMerchantPayments activeMerchantPaymentsView;
+  private final InactiveMerchantPayments inactiveMerchantPaymentsView;
 
   public SystemIntegrationTest() {
     testKit.start();
@@ -60,6 +61,7 @@ public class SystemIntegrationTest {
     merchantPaymentsByMerchantByDateView = testKit.getGrpcClient(MerchantPaymentsByMerchantByDate.class);
     merchantPaymentsByDateView = testKit.getGrpcClient(MerchantPaymentsByDate.class);
     activeMerchantPaymentsView = testKit.getGrpcClient(ActiveMerchantPayments.class);
+    inactiveMerchantPaymentsView = testKit.getGrpcClient(InactiveMerchantPayments.class);
   }
 
   @Test
@@ -86,10 +88,10 @@ public class SystemIntegrationTest {
             .setFromDate(from)
             .setToDate(to)
             .setMerchantId("tesco")
-            .setPaymentId("0")
+            .setPaymentId("payment-1")
             .build();
     var unPaidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(unPaidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(1,unPaidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+    assertEquals(1, unPaidLedgerEntriesByMerchantAndDateRes.getResultsCount());
     var ledgerEntriesByTransactionRequest = LedgerEntriesByTransactionModel.LedgerEntriesByTransactionRequest.newBuilder()
         .setTransactionId("txn-1")
         .build();
@@ -123,7 +125,7 @@ public class SystemIntegrationTest {
 
     //check
     unPaidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(unPaidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(0,unPaidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+    assertEquals(0, unPaidLedgerEntriesByMerchantAndDateRes.getResultsCount());
     ledgerEntriesByTransactionRes = ledgerEntriesByTransactionView.getLedgerEntriesByTransaction(ledgerEntriesByTransactionRequest).toCompletableFuture().get(5,SECONDS);
     assertEquals(1, ledgerEntriesByTransactionRes.getResultsCount());
     assertEquals("payment-1", ledgerEntriesByTransactionRes.getResults(0).getPaymentId());
@@ -133,7 +135,7 @@ public class SystemIntegrationTest {
             .setPaymentId("payment-1")
             .build();
     var paidLedgerEntriesByMerchantAndDateRes = ledgerEntriesByDateView.getLedgerEntriesByDate(paidLedgerEntriesByMerchantAndDateReq).toCompletableFuture().get(5,SECONDS);
-    assertEquals(1,paidLedgerEntriesByMerchantAndDateRes.getResultsCount());
+    assertEquals(1, paidLedgerEntriesByMerchantAndDateRes.getResultsCount());
     assertEquals("payment-1", paidLedgerEntriesByMerchantAndDateRes.getResults(0).getPaymentId());
   }
 
@@ -261,11 +263,15 @@ public class SystemIntegrationTest {
         .build()).toCompletableFuture().get(10, SECONDS);
     Thread.sleep(3000);
 
-    ActiveMerchantPaymentsModel.MerchantPaymentsResponse activePayments = activeMerchantPaymentsView.getActiveMerchantPayments(ActiveMerchantPaymentsModel.ActiveMerchantPaymentsRequest.newBuilder()
+    ActiveMerchantPaymentsModel.ActiveMerchantPaymentsResponse activePayments = activeMerchantPaymentsView.getActiveMerchantPayments(ActiveMerchantPaymentsModel.ActiveMerchantPaymentsRequest.newBuilder()
         .setStartFrom(0)
         .setCount(50)
         .build()).toCompletableFuture().get(5,SECONDS);
     assertEquals(1, activePayments.getMerchantPaymentsCount());
+    InactiveMerchantPaymentsModel.InactiveMerchantPaymentsResponse inactivePayments = inactiveMerchantPaymentsView.getInactiveMerchantPayments(InactiveMerchantPaymentsModel.InactiveMerchantPaymentsRequest.newBuilder()
+        .setMerchantId("amazon")
+        .build()).toCompletableFuture().get(5,SECONDS);
+    assertEquals(1, inactivePayments.getMerchantPaymentsCount());
     MerchantPaymentsByDateModel.MerchantPaymentsByDateResponse allPayments = merchantPaymentsByDateView.getMerchantPaymentsByDate(MerchantPaymentsByDateModel.MerchantPaymentsByDateRequest.newBuilder()
         .setFromDate(Timestamps.fromMillis(Instant.now().minusSeconds(1000).toEpochMilli()))
         .setToDate(Timestamps.fromMillis(Instant.now().toEpochMilli()))

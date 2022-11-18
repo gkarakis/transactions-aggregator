@@ -4,6 +4,8 @@ import com.google.protobuf.Empty;
 import io.aggregator.api.LedgerEntryApi;
 import io.grpc.Status;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the Event Sourced Entity Service described in your io/aggregator/api/ledger_entry_api.proto file.
@@ -12,6 +14,7 @@ import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
 // or delete it so it is regenerated as needed.
 
 public class LedgerEntry extends AbstractLedgerEntry {
+  static final Logger log = LoggerFactory.getLogger(LedgerEntry.class);
 
   @SuppressWarnings("unused")
   private final String entityId;
@@ -27,6 +30,9 @@ public class LedgerEntry extends AbstractLedgerEntry {
 
   @Override
   public Effect<Empty> createLedgerEntry(LedgerEntryEntity.LedgerEntryState currentState, LedgerEntryApi.CreateLedgerEntryCommand createLedgerEntryCommand) {
+    log.debug("state: {}\ncreateLedgerEntryCommand: {}", currentState, createLedgerEntryCommand);
+    log.info(Thread.currentThread().getName() + " - RECEIVED COMMAND: CreateLedgerEntryCommand");
+
     if (!currentState.equals(LedgerEntryEntity.LedgerEntryState.getDefaultInstance()))
       return effects().reply(Empty.getDefaultInstance());
 

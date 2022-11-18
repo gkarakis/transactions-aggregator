@@ -4,6 +4,8 @@ import com.google.protobuf.Any;
 import io.aggregator.entity.LedgerEntryEntity;
 import kalix.javasdk.view.View;
 import kalix.javasdk.view.ViewContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // This class was initially generated based on the .proto definition by Kalix tooling.
 // This is the implementation for the View Service described in your io/aggregator/view/ledger_entries_by_date.proto file.
@@ -12,6 +14,7 @@ import kalix.javasdk.view.ViewContext;
 // or delete it so it is regenerated as needed.
 
 public class LedgerEntriesByDateView extends AbstractLedgerEntriesByDateView {
+  static final Logger log = LoggerFactory.getLogger(LedgerEntriesByDateView.class);
 
   public LedgerEntriesByDateView(ViewContext context) {}
 
@@ -23,6 +26,9 @@ public class LedgerEntriesByDateView extends AbstractLedgerEntriesByDateView {
   @Override
   public View.UpdateEffect<LedgerEntriesByDateModel.LedgerEntriesByDateViewState> onLedgerEntryCreated(
       LedgerEntriesByDateModel.LedgerEntriesByDateViewState state, LedgerEntryEntity.LedgerEntryCreated ledgerEntryCreated) {
+    log.debug("state: {}\nLedgerEntryCreated: {}", state, ledgerEntryCreated);
+    log.info(Thread.currentThread().getName() + " - RECEIVED EVENT: LedgerEntryCreated");
+
     LedgerEntriesByDateModel.LedgerEntriesByDateViewState newState = LedgerEntriesByDateModel.LedgerEntriesByDateViewState.newBuilder()
         .setTransactionId(ledgerEntryCreated.getLedgerEntryKey().getTransactionId())
         .setServiceCode(ledgerEntryCreated.getLedgerEntryKey().getServiceCode())
@@ -30,6 +36,7 @@ public class LedgerEntriesByDateView extends AbstractLedgerEntriesByDateView {
         .setAccountTo(ledgerEntryCreated.getLedgerEntryKey().getAccountTo())
         .setIncidentTimestamp(ledgerEntryCreated.getIncidentTimestamp())
         .setAmount(ledgerEntryCreated.getAmount())
+        .setPaymentId("0")
         .setMerchantId(ledgerEntryCreated.getMerchantId())
         .setShopId(ledgerEntryCreated.getShopId())
         .setEventType(ledgerEntryCreated.getEventType())

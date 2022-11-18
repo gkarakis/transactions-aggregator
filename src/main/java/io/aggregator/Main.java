@@ -38,6 +38,7 @@ public final class Main {
       FrontendAction::new,
       HourToDayAction::new,
       HourToMinuteAction::new,
+      InactiveMerchantPaymentsView::new,
       LedgerEntriesByDateView::new,
       LedgerEntriesByTransactionView::new,
       MerchantPaymentsByDateView::new,

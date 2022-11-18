@@ -9,21 +9,22 @@ import "google/protobuf/timestamp.proto";
 import "io/aggregator/entity/payment_entity.proto";
 import "io/aggregator/view/merchant_payment.proto";
 
-option java_outer_classname = "ActiveMerchantPaymentsModel";
+option java_outer_classname = "InactiveMerchantPaymentsModel";
 
-service ActiveMerchantPayments {
+service InactiveMerchantPayments {
   option (kalix.codegen) = {
     view: {}
   };
 
-  rpc GetActiveMerchantPayments(ActiveMerchantPaymentsRequest) returns (ActiveMerchantPaymentsResponse) {
+  rpc GetInactiveMerchantPayments(InactiveMerchantPaymentsRequest) returns (InactiveMerchantPaymentsResponse) {
     option (kalix.method).view.query = {
       query: "SELECT * AS merchant_payments"
-             "  FROM active_merchant_payments"
-             " WHERE payment_timestamp IS NULL"
+             "  FROM inactive_merchant_payments"
+             " WHERE payment_timestamp IS NOT NULL"
+             "   AND merchant_id = :merchant_id"
     };
     option (google.api.http) = {
-      post: "/active-merchant-payments"
+      post: "/inactive-merchant-payments"
     };
   }
 
@@ -32,7 +33,7 @@ service ActiveMerchantPayments {
       event_sourced_entity: "payment"
     };
     option (kalix.method).view.update = {
-      table: "active_merchant_payments"
+      table: "inactive_merchant_payments"
       transform_updates: true
     };
   }
@@ -42,7 +43,7 @@ service ActiveMerchantPayments {
       event_sourced_entity: "payment"
     };
     option (kalix.method).view.update = {
-      table: "active_merchant_payments"
+      table: "inactive_merchant_payments"
       transform_updates: true
     };
   }
@@ -52,17 +53,16 @@ service ActiveMerchantPayments {
       event_sourced_entity: "payment"
     };
     option (kalix.method).view.update = {
-      table: "active_merchant_payments"
+      table: "inactive_merchant_payments"
       transform_updates: true
     };
   }
 }
 
-message ActiveMerchantPaymentsRequest {
-  int32 start_from = 1;
-  int32 count = 2;
+message InactiveMerchantPaymentsRequest {
+  string merchant_id = 1;
 }
 
-message ActiveMerchantPaymentsResponse {
+message InactiveMerchantPaymentsResponse {
   repeated MerchantPayment merchant_payments = 1;
 }
